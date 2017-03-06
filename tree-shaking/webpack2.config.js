@@ -1,9 +1,8 @@
 var path = require("path");
 var webpack = require("webpack");
-
-var config = {
+module.exports = {
     entry: {
-        app: ['./index']
+        main: ['./main']
     },
     output: {
         path: path.join(__dirname) + "/dist/",
@@ -19,9 +18,12 @@ var config = {
             }
         }]
     },
-    resolve: {    	
+    resolve: {      
         mainFields: ["jsnext:main", "main"]
+    },
+    performance: {
+        hints: "warning",
+        maxEntrypointSize: 500000,
+        maxAssetSize: 500000
     }
 }
-
-module.exports = config;

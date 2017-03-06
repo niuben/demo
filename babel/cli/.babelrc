@@ -1,0 +1,8 @@
+{
+	presets: ["es2015"],
+	plugins: [
+		"custom",	
+		"transform-runtime",
+      		"transform-es2015-classes"
+	]
+}
