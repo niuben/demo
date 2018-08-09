@@ -1,0 +1,28 @@
+<!-- Learn about this code on MDN: https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_usage -->
+
+<html>
+
+<head>
+
+</head>
+
+<body>
+    <canvas id="canvas" width="700" height="700"></canvas>
+    <script type="application/javascript">        
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        // ctx.moveTo(0, 50);        
+        for(var i = 0; i < 314*2; i++){
+            var x = i * 0.01;
+            var y = Math.sin(x);
+            console.log(x, y);
+            ctx.lineTo(x * 100 , y * 100 + 150);        
+        }
+        // ctx.closePath();
+        ctx.stroke();
+
+    </script>
+</body>
+
+</html>
