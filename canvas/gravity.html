@@ -1,0 +1,104 @@
+<!-- Learn about this code on MDN: https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_usage -->
+
+<html>
+<meta charset="utf-8">
+<title>重力</title>
+<head>
+    <style>
+        canvas {
+            display: block;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="start">下落</button>
+    <canvas id="canvas" width="350" height="500"></canvas>
+    <script type="application/javascript" src="js/grid.js"></script>
+    <script type="application/javascript">
+        // 
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+
+        var x = sx = 40;
+        var y = sy = 40;
+
+        var RADIUS = 30;
+
+        var MAX_WIDTH = 600;
+        var MAX_HEIGHT = 500;
+
+        var RECT_X = 10;
+        var RECT_Y = 70;
+        var RECT_WIDTH = 60;
+        var RECT_HEIGHT = 10;
+        
+        var PLATFORM_HEIGHT_IN_METERS = 10;
+        var pixelsPerMeter = (MAX_HEIGHT - canvas.getBoundingClientRect().top) / PLATFORM_HEIGHT_IN_METERS;
+
+        var G = 9.81;
+        var vx = 110;
+        var lastTime,startTime,handle
+
+        //画一个小球
+        function drawBall() {
+            context.beginPath();
+            context.arc(x, y, RADIUS, 0, 2 * Math.PI);
+            context.fill();
+        }
+
+        //画木板
+        function drawBar() {
+            context.beginPath();
+
+            context.strokeStyle = "#000";
+            // context.shadowColor = "#000";
+            // context.shadowOffsetX = "2";
+            // context.shadowOffsetY = "2";
+            // context.shadowtBlur = "5";
+
+            context.rect(RECT_X, RECT_Y, RECT_WIDTH, RECT_HEIGHT);
+            context.stroke();
+            context.fill();
+        }
+
+        function drawAll() {
+            context.clearRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
+            drawGrid('lightgray', 10, 10);
+            drawBall();
+            drawBar();
+        }
+
+        function move() {
+            var nowTime = new Date().getTime();
+            var fps =  1000 / (nowTime - lastTime);            
+            
+            if (x > (RECT_WIDTH + RECT_X)){                
+                startTime = startTime == undefined ? nowTime : startTime;
+                var v = G * ((nowTime - startTime) / 1000) * pixelsPerMeter;                
+                y += v/fps;
+            }
+            x += vx/fps;            
+            drawAll();
+            
+            lastTime = nowTime;
+            handle = requestAnimationFrame(move);
+        }
+
+        
+        document.getElementById("start").onclick = function () {
+            x = sx;
+            y = sy;
+            lastTime =  new Date().getTime();
+            startTime = undefined;
+            move();
+        }
+        
+        drawAll();
+
+    </script>
+</body>
+
+</html>

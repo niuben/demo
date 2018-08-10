@@ -2,8 +2,8 @@
 var WIDTH = 800
 var HEIGHT = 400
 var polygonPoints = [
-  [ new Point(320, 120), new Point(300, 170),
-    new Point(350, 250)],
+  [ new Point(520, 120), new Point(500, 170),
+    new Point(550, 250)],
   [new Point(100, 100), new Point(100, 150),
     new Point(150, 150), new Point(150, 100)]
 ]

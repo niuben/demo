@@ -116,33 +116,62 @@ Shape.prototype.cover = function (shape) {
   var isCover = true
   var _this = this
   var minVector = new Vector()
-  var minDot
+  var minDot, minIndex;
 
   // 如果被检测的形状是圆型，则对需要把当前形状传入  
-  var axis = shape.isCircle == true ? this.getAxis(shape) : this.getAxis()
-  axis = shape.isCircle == true ? axis.concat(shape.getAxis(this)) : axis.concat(shape.getAxis())
+  var axis = shape.isCircle == true ? this.getAxis(shape) : this.getAxis();
+  axis = shape.isCircle == true ? axis.concat(shape.getAxis(this)) : axis.concat(shape.getAxis());
 
-
-  axis.map(function (oneAxis) {
-    var dot = _this.dotList(oneAxis)
-    var dot1 = shape.dotList(oneAxis)
+  axis.map(function (oneAxis, index) {
+    var dot = _this.dotList(oneAxis);
+    var dot1 = shape.dotList(oneAxis);
 
     var coverNum = checkCover(dot, dot1)
     if (coverNum == false) {
       isCover = false
     }else {
       if (minDot == undefined || minDot > coverNum) {
-        minDot = coverNum
+        minDot = coverNum;
+        minIndex = index;
       }
     }
   })
 
   return {
     isCover: isCover,
-    minDot: Math.ceil(minDot)
+    minDot: Math.ceil(minDot),
+    normalAxis: axis[minIndex]
   }
 }
 Shape.prototype.isPointInPath = function (context, x, y) {
   this.drawLine(context)
   return context.isPointInPath(x, y)
+}
+
+/*
+* 获取反射向量
+* 公式  R = 2 * (V * l) /(l * l)l - V;
+*  V：前进的速度向量;
+*  L: 边缘向量的法向量;
+*/
+Shape.prototype.reflect = function(normalAxis, context){
+  
+  var vx = this.vx;
+  var vy = this.vy;  
+
+  var vector = new Vector(vx, vy);
+  var unitVector = vector.normal();
+    
+  var hypotenuse = vector.hypotenuse(vx, vy);
+  
+  // var vUnitAxis = new Vector(unitVX, unitVY);    
+  var dot = unitVector.dotProduct(normalAxis);
+  var dot1 = normalAxis.dotProduct(normalAxis);
+  var dotRatio = dot / dot1;
+
+  var unitVX = 2 * dotRatio * normalAxis.x - unitVector.x;  
+  var unitVY = 2 * dotRatio * normalAxis.y - unitVector.y;
+
+  this.vx = unitVX * hypotenuse;
+  this.vy = unitVY * hypotenuse;  
 }

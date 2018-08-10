@@ -1,0 +1,214 @@
+<!-- Learn about this code on MDN: https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_usage -->
+
+<html>
+<meta charset="utf-8">
+<title>钟摆运动</title>
+
+<head>
+    <style>
+        canvas {
+            display: block;
+            border: 1px solid #000;
+        }
+        #bucket{
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <canvas id="canvas" width="800" height="500"></canvas>
+    <img src="" id="bucket"/>
+    <script type="application/javascript" src="js/base.js"></script>
+    <script type="application/javascript" src="js/grid.js"></script>
+    <script type="application/javascript">
+        // 
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        var img = document.getElementById("bucket");
+        img.onload = function(){
+            drawAll();
+        }
+        img.src = "./shared/images/bucket.png";
+
+        var RADIUS = 10;
+
+        var MAX_WIDTH = 800;
+        var MAX_HEIGHT = 500;
+
+        var RECT_X = 10;
+        var RECT_Y = 460;
+        var RECT_WIDTH = 60;
+        var RECT_HEIGHT = 10;
+
+        
+        var BUCKET_X = 700;
+        var BUCKET_Y = 412;
+        var BUCKET_WIDTH = 82;
+        var BUCKET_HEIGHT = 62;
+
+
+        var PLATFORM_HEIGHT_IN_METERS = 10;
+        var pixelsPerMeter = (MAX_HEIGHT - canvas.getBoundingClientRect().top) / PLATFORM_HEIGHT_IN_METERS;
+
+        
+        var x = sx = 40;
+        var y = sy = 450;
+        
+        var ex = 0;
+        var ey = 0;
+
+        var G = 9.81;
+        var vx = 0;
+        var vy = 0;
+
+        var multiple = 2;
+        
+        var isMoving = false;
+        var lastTime, startTime, handle
+
+        //画一个小球
+        function clear(){
+            context.clearRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
+            drawGrid('lightgray', 10, 10);
+        }
+        function drawBall() {
+            context.beginPath();
+            context.strokeStyle = "#00F";            
+            context.fillStyle = "#FF0";            
+            context.arc(x, y, RADIUS, 0, 2 * Math.PI);
+            context.stroke();
+            context.fill();
+            
+        }
+
+        function drawBar() {
+            context.beginPath();
+            context.strokeStyle = "#000";            
+            context.rect(RECT_X, RECT_Y, RECT_WIDTH, RECT_HEIGHT);
+            context.stroke();
+            context.fill();
+        }
+        
+        function drawBucket(){
+            context.drawImage(img, BUCKET_X, BUCKET_Y);            
+        }
+
+        function drawAll() {
+            clear();
+            drawBall();
+            drawBucket()
+            drawBar();
+        }
+
+        function drawLine(){
+            
+            var dirtyX = ex - x;
+            var dirtyY = ey - y; 
+            var hypotenuse = Math.sqrt(Math.pow(dirtyX, 2) + Math.pow(dirtyY, 2));
+            
+            var cos = dirtyX / hypotenuse;
+            var sin = dirtyY / hypotenuse;
+            
+            var angle = Math.PI / 180 * 60;
+
+            context.beginPath();
+            context.moveTo(sx + cos*RADIUS, sy + sin * RADIUS);
+            context.lineTo(ex, ey);
+            context.stroke();
+            context.closePath();
+        }
+        
+        function drawText(){
+            context.save();            
+            context.font = "36px Align";
+            context.fillStyle = "rgba(100,140,230,0.6)";
+            
+            var title = "好球~~";
+            var textWidth = context.measureText(title).width;            
+            context.fillText(title, MAX_WIDTH/2 - textWidth/2, MAX_HEIGHT/2);            
+            context.restore();
+        }
+
+        function animate(){
+
+            if(x - RADIUS > MAX_WIDTH || y - RADIUS > MAX_HEIGHT){
+                isMoving = false;
+                reset();
+                return;
+            }
+            move();
+            drawAll();
+            isRefect();
+            handle = requestAnimationFrame(animate);
+        }   
+
+        function move() {
+            var nowTime = new Date().getTime();
+            var fps = 1000 / (nowTime - lastTime);
+            var v = G * ((nowTime - startTime) / 1000) * pixelsPerMeter;
+
+            vy = vy + v / fps;
+
+            y += vy / fps
+            x += vx / fps;
+                                    
+            lastTime = nowTime;
+            
+        }
+
+        function reset(){
+            x = sx;
+            y = sy;            
+            lastTime =  new Date().getTime();
+        }
+        
+        document.onmousemove = function (e) {            
+            
+            if(isMoving == true){
+                return;
+            }
+            var pos = windowToCanvas(e);
+            ex = pos.x;
+            ey = pos.y;
+                        
+            // clear();
+            drawAll();
+            drawLine();            
+        }
+
+        document.onmouseup = function (e) {
+            
+            if(isMoving == true){
+                return;
+            }
+            
+            isMoving = true;
+            startTime = new Date().getTime();
+            
+            drawAll();
+            reset();
+            animate();
+
+            vx = (ex - sx) * multiple;
+            vy = (ey - sy) * multiple;
+        }
+
+        //判断是否重合
+        function isRefect(){
+            var refectY = BUCKET_Y;
+            if(y > refectY && x > BUCKET_X + BUCKET_WIDTH/3 && x < BUCKET_X + BUCKET_WIDTH ){                
+                clear();
+                drawBar();
+                drawBucket();
+                drawText();
+                cancelAnimationFrame(handle);
+            }                    
+        }       
+
+        drawAll();
+    </script>
+</body>
+
+</html>

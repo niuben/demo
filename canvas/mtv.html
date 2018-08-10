@@ -12,46 +12,16 @@
     </style>
 </head>
 
-<body>
-    <button id="start">开始</button>
+<body>    
     <canvas id="canvas" width="800" height="400"></canvas>
     <script src="js/conf.js"></script>
+    <script src="js/grid.js"></script>
+
     <script src="js/vector.js"></script>
     <script src="js/shape.js"></script>
     <script src="js/circle.js"></script>
     <script>
-        function drawGrid(color, stepx, stepy) {
-            context.save();
-
-            context.shadowColor = undefined;
-            context.shadowBlur = 0;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
-
-            context.strokeStyle = color;
-            context.fillStyle = '#ffffff';
-            context.lineWidth = 0.5;
-            context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-
-            for (var i = stepx + 0.5; i < context.canvas.width; i += stepx) {
-                context.beginPath();
-                context.moveTo(i, 0);
-                context.lineTo(i, context.canvas.height);
-                if (Math.floor(i) % 50 == 0) { context.strokeText(Math.floor(i - 0.5), i - 10 / 2, 10); }
-                context.stroke();
-            }
-
-            for (var i = stepy + 0.5; i < context.canvas.height; i += stepy) {
-                context.beginPath();
-                context.moveTo(0, i);
-                context.lineTo(context.canvas.width, i);
-                if (Math.floor(i) % 50 == 0) { context.strokeText(Math.floor(i - 0.5), 0, i); }
-                context.stroke();
-            }
-
-            context.restore();
-        }
-
+        
     </script>
     <script>
         /*
@@ -63,6 +33,7 @@
         var context = canvas.getContext('2d');
 
         var handle;
+        var isMoved = false;
 
         function drawShapes() {
             shapes.forEach(function (shape) {
@@ -85,31 +56,53 @@
 
         function detectCollisions() {
             var textY = 30;
-            if (shapeBeingDragged) {
-                shapes.forEach(function (shape) {
-                    if (shape !== shapeBeingDragged) {
-                        var obj = shapeBeingDragged.cover(shape);
-                        if (obj.isCover) {
-
-                            shapeBeingDragged.pause();
-
-                            // clearTimeout(handle);
-                            cancelAnimationFrame(handle);
-                            setTimeout(function(){
-                                console.log("a");
-                                shapeBeingDragged.start();
-                                shapeBeingDragged.move(-obj.minDot, -obj.minDot);
-                                shapeBeingDragged.pause();
-                            }, 1000);
-
-                            context.font = "18px Align";
-                            context.fillStyle = shape.fillStyle;
-                            context.fillText('碰撞', 20, textY);
-                            textY += 40;
-                        }
-                    }
-                });
+            if (shapeBeingDragged == undefined) {
+                return;
             }
+
+            
+            for(var i = 0; i < shapes.length; i++){
+                var shape = shapes[i];            
+                if (shape == shapeBeingDragged) {
+                    continue;
+                }
+                var obj = shapeBeingDragged.cover(shape);
+                if (obj.isCover) {                        
+                    
+                    context.font = "18px Align";
+                    context.fillStyle = shape.fillStyle;
+                    context.fillText('碰撞', 20, textY);
+                    textY += 40;
+                    
+                    // shapeBeingDragged.pause();                                    
+                    // clearTimeout(handle);
+                        
+                        // cancelAnimationFrame(handle);                    
+                        if(isMoved == true){
+                            return; 
+                        }
+                        
+                        //两个物体黏在一起
+                        // shapeBeingDragged.start();
+                        // shapeBeingDragged.move(-obj.minDot, -obj.minDot);
+                        // shapeBeingDragged.pause();
+                        
+                        
+                        //一个物体碰到另一个物体弹开
+                        shapeBeingDragged.reflect(obj.normalAxis, context);                        
+                        isMoved = true;
+                    // }, 1000);
+
+                    setTimeout(function(){                                
+                        isMoved = false;
+                    }, 500);
+
+                    
+                    break;
+                }
+            }            
+            
+            return;
         };
 
         function checkCover(dot, dot1) {
@@ -175,11 +168,9 @@
         //     var circle = new Circle(point.x, point.y, r);            
         //     shapes.push(circle);
         // })    
-        shapeBeingDragged = shapes[shapes.length - 1];
-        shapeBeingDragged.getAxis(shapes[shapes.length - 2])
-        
-
-                
+        shapeBeingDragged = shapes[shapes.length - 2];
+        shapeBeingDragged.getAxis(shapes[shapes.length - 1])
+                        
         function move(){
             context.clearRect(0, 0, WIDTH, HEIGHT);
             drawGrid('lightgray', 10, 10);
@@ -190,8 +181,8 @@
                 }
             });
             drawShapes();
-            detectCollisions();
-            handle = requestAnimationFrame(move);
+            detectCollisions();            
+            requestAnimationFrame(move);            
         }
         
         move();
