@@ -10,202 +10,176 @@
             display: block;
             border: 1px solid #000;
         }
-        #bucket{
+
+        #bucket {
             display: none;
         }
     </style>
 </head>
 
 <body>
-    
+
     <canvas id="canvas" width="800" height="500"></canvas>
-    <img src="" id="bucket"/>
+    <img src="" id="bucket" />
     <script type="application/javascript" src="js/base.js"></script>
     <script type="application/javascript" src="js/grid.js"></script>
     <script type="application/javascript">
         // 
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
-        var img = document.getElementById("bucket");
-        img.onload = function(){
-            drawAll();
-        }
-        img.src = "./shared/images/bucket.png";
-
-        var RADIUS = 10;
 
         var MAX_WIDTH = 800;
         var MAX_HEIGHT = 500;
 
-        var RECT_X = 10;
-        var RECT_Y = 460;
-        var RECT_WIDTH = 60;
-        var RECT_HEIGHT = 10;
 
-        
-        var BUCKET_X = 700;
-        var BUCKET_Y = 412;
-        var BUCKET_WIDTH = 82;
-        var BUCKET_HEIGHT = 62;
+        //小圆
+        var POINT_RADIUS = 10
+        var POINT_X = MAX_WIDTH / 2;
+        var POINT_Y = 30;
+
+
+        var LINE = 300;
+
+        //大圆
+        var RADIUS = 20;
+        var x = sx = ex = MAX_WIDTH / 2;
+        var y = sy = ex = POINT_Y + LINE;
 
 
         var PLATFORM_HEIGHT_IN_METERS = 10;
         var pixelsPerMeter = (MAX_HEIGHT - canvas.getBoundingClientRect().top) / PLATFORM_HEIGHT_IN_METERS;
 
-        
-        var x = sx = 40;
-        var y = sy = 450;
-        
-        var ex = 0;
-        var ey = 0;
 
         var G = 9.81;
         var vx = 0;
-        var vy = 0;
-
-        var multiple = 2;
         
+        var multiple = 2;
+
         var isMoving = false;
+        var isDraging = false;
         var lastTime, startTime, handle
 
+
+        var angle = 0;
+        //画图区域                    
         //画一个小球
-        function clear(){
+        function clearAll() {
             context.clearRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
             drawGrid('lightgray', 10, 10);
         }
-        function drawBall() {
+        function drawArc(x, y, r) {
+            context.save();
+            context.strokeStyle = "#00F";
+            context.fillStyle = "#FF0";
             context.beginPath();
-            context.strokeStyle = "#00F";            
-            context.fillStyle = "#FF0";            
-            context.arc(x, y, RADIUS, 0, 2 * Math.PI);
+            context.arc(x, y, r, 0, 2 * Math.PI);
             context.stroke();
             context.fill();
-            
-        }
-
-        function drawBar() {
-            context.beginPath();
-            context.strokeStyle = "#000";            
-            context.rect(RECT_X, RECT_Y, RECT_WIDTH, RECT_HEIGHT);
-            context.stroke();
-            context.fill();
-        }
-        
-        function drawBucket(){
-            context.drawImage(img, BUCKET_X, BUCKET_Y);            
-        }
-
-        function drawAll() {
-            clear();
-            drawBall();
-            drawBucket()
-            drawBar();
-        }
-
-        function drawLine(){
-            
-            var dirtyX = ex - x;
-            var dirtyY = ey - y; 
-            var hypotenuse = Math.sqrt(Math.pow(dirtyX, 2) + Math.pow(dirtyY, 2));
-            
-            var cos = dirtyX / hypotenuse;
-            var sin = dirtyY / hypotenuse;
-            
-            var angle = Math.PI / 180 * 60;
-
-            context.beginPath();
-            context.moveTo(sx + cos*RADIUS, sy + sin * RADIUS);
-            context.lineTo(ex, ey);
-            context.stroke();
-            context.closePath();
-        }
-        
-        function drawText(){
-            context.save();            
-            context.font = "36px Align";
-            context.fillStyle = "rgba(100,140,230,0.6)";
-            
-            var title = "好球~~";
-            var textWidth = context.measureText(title).width;            
-            context.fillText(title, MAX_WIDTH/2 - textWidth/2, MAX_HEIGHT/2);            
             context.restore();
         }
 
-        function animate(){
+        function drawBall(){                         
+            // drawArc(x + cos * RADIUS, y - sin * RADIUS, RADIUS);
+            drawArc(x, y, RADIUS);
+        }
+        function drawPoint(){            
+            drawArc(POINT_X, POINT_Y, POINT_RADIUS);
+        }
 
-            if(x - RADIUS > MAX_WIDTH || y - RADIUS > MAX_HEIGHT){
-                isMoving = false;
-                reset();
+        function getAngle(x){                        
+            x = Math.abs(x - sx) > LINE ? (x > sx ? sx + LINE : sx - LINE) : x;
+            return (x - sx) / LINE * 90;                        
+        }            
+
+        function getXYByAngle(angle){
+            
+        }
+
+        function drawLine() {
+
+            var angle = getAngle();
+            var cos = angle.cos;
+            var sin = angle.sin;
+
+            context.beginPath();
+            context.moveTo(POINT_X, POINT_Y);
+            context.lineTo(x, y);
+            context.stroke();
+            context.closePath();
+        }
+
+        function drawAll() {
+            clearAll();
+            drawLine();
+            drawPoint();
+            drawBall();
+        }
+
+        //逻辑区域
+        function animate() {
+
+            if(isDraging == true && isMoving == false){
                 return;
             }
             move();
             drawAll();
-            isRefect();
             handle = requestAnimationFrame(animate);
-        }   
+        }
 
         function move() {
             var nowTime = new Date().getTime();
-            var fps = 1000 / (nowTime - lastTime);
-            var v = G * ((nowTime - startTime) / 1000) * pixelsPerMeter;
+            // var fps = 1000 / (nowTime - lastTime);
+            var currentAngle = angle * Math.cos(Math.sqrt(G * pixelsPerMeter / LINE) * ((nowTime - startTime) / 1000)); 
+            // console.log("fps", fps, "currentAngle", currentAngle);        
+            currentAngle = Math.PI / 180 * currentAngle;
 
-            vy = vy + v / fps;
+            x = sx + LINE * Math.sin(currentAngle);
+            y = POINT_Y + LINE * Math.cos(currentAngle);
 
-            y += vy / fps
-            x += vx / fps;
-                                    
             lastTime = nowTime;
-            
+        }   
+
+        //用户交互区域
+        document.onmousedown = function (e) {
+            var pos = windowToCanvas(e);
+            if(pos.x < x + RADIUS && pos.x > x - RADIUS && pos.y < y + RADIUS && pos.y > y - RADIUS){
+                sx = pos.x;
+                sy = pos.y;
+                isDraging = true;
+            }
+
         }
 
-        function reset(){
-            x = sx;
-            y = sy;            
-            lastTime =  new Date().getTime();
-        }
-        
-        document.onmousemove = function (e) {            
-            
-            if(isMoving == true){
+        document.onmousemove = function (e) {
+
+            if (isDraging != true || isMoving == true) {
                 return;
             }
+            
             var pos = windowToCanvas(e);
-            ex = pos.x;
-            ey = pos.y;
-                        
-            // clear();
+            x = pos.x;            
+            x = Math.abs(x - sx) > LINE ? (x > sx ? sx + LINE : sx - LINE) : x;
+
+            angle = getAngle(x);
+            y = LINE * Math.cos(Math.PI / 180 * Math.abs(angle)) + POINT_Y;            
+
             drawAll();
-            drawLine();            
         }
 
         document.onmouseup = function (e) {
             
-            if(isMoving == true){
-                return;
-            }
-            
+            startTime = lastTime = new Date().getTime();
+            isDraging = false;
             isMoving = true;
-            startTime = new Date().getTime();
-            
-            drawAll();
-            reset();
             animate();
 
-            vx = (ex - sx) * multiple;
-            vy = (ey - sy) * multiple;
-        }
+            // drawAll();
+            // reset();
+            // animate();
 
-        //判断是否重合
-        function isRefect(){
-            var refectY = BUCKET_Y;
-            if(y > refectY && x > BUCKET_X + BUCKET_WIDTH/3 && x < BUCKET_X + BUCKET_WIDTH ){                
-                clear();
-                drawBar();
-                drawBucket();
-                drawText();
-                cancelAnimationFrame(handle);
-            }                    
-        }       
+            // vx = (ex - sx) * multiple;
+            // vy = (ey - sy) * multiple;
+        }
 
         drawAll();
     </script>
