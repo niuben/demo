@@ -1,0 +1,27 @@
+<html>
+    <title>getSelection</title>
+    <body>
+        <button onclick="selectH2()">选中标题</button> <button onclick="selectStrong()">选中加粗字体</button>  <span>tips: 同时只能有一处选中</span>
+        <h2>标题：12356</h2>        
+        <p>123<strong>4</strong>56</p>
+        
+        <script>
+            // var range = selection.getRangeAt(0);
+            var selection = window.getSelection();
+
+            function selectH2(){
+                var range = document.createRange();
+                range.selectNode(document.getElementsByTagName("h2")[0]);            
+                selection.addRange(range);
+            }
+
+            function selectStrong(){
+                var range = document.createRange();
+                range.selectNode(document.getElementsByTagName("strong")[0]);            
+                selection.addRange(range);
+            }
+
+            // console.log(range);
+        </script>    
+    </body>
+</html> 

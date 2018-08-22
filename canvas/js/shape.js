@@ -4,8 +4,8 @@ function Shape (strokStyle, fillStyle) {
   this.vectors = []
   this.strokStyle = strokStyle
   this.fillStyle = fillStyle
-  this.vx = velocity_x
-  this.vy = velocity_y
+  // this.vx = velocity.x
+  // this.vy = velocity.y
 
   this.isPause = false
 }
@@ -21,21 +21,13 @@ Shape.prototype.move = function (x, y) {
     return
   }
 
-  var vx = x == undefined ? this.vx : x; 
-  var vy = y == undefined ? this.vy : y;
-  var _this = this
+  // var vx = x == undefined ? velocity.x : x; 
+  // var vy = y == undefined ? velocity.y : y;
+  // var _this = this;
 
   this.points = this.points.map(function (point) {
-    point.x += vx
-    point.y += vy
-
-    if (point.x >= WIDTH || point.x <= 0) {
-      _this.vx = -vx
-    }
-
-    if (point.y >= HEIGHT || point.y <= 0) {
-      _this.vy = -vy
-    }
+    point.x += x;
+    point.y += y;
 
     return point
   })
@@ -77,15 +69,26 @@ Shape.prototype.fill = function (context) {
 
 // 得到法向量
 Shape.prototype.getAxis = function () {
-  var axis = []
-  var vectors = this.toVector()
+  var v1, v2, surfaceVector, axes = [], pushAxis = true;
 
-  vectors.map(function (vector) {
-    var normalVector = vector.normal()
-    normalVector.draw()
-    axis.push(normalVector)
-  })
-  return axis
+  var length = this.points.length;
+      
+   for (var i=0; i < length-1; i++) {
+      v1 = new Vector(this.points[i].x, this.points[i].y);
+      v2 = new Vector(this.points[i+1].x, this.points[i+1].y);
+
+      surfaceVector = v2.subtract(v1);
+      axes.push(surfaceVector.perpendicular().normal());
+   }
+
+
+    v1 = new Vector(this.points[length -1].x, this.points[length -1].y);
+    v2 = new Vector(this.points[0].x, this.points[0].y);
+
+    surfaceVector = v2.subtract(v1);
+    axes.push(surfaceVector.perpendicular().normal());
+
+   return axes;
 }
 
 // 将点转化为向量
@@ -113,6 +116,42 @@ Shape.prototype.dotList = function (axis) {
 }
 
 Shape.prototype.cover = function (shape) {
+    
+  var minimumOverlap = BIG_NUMBER,
+       overlap,
+       axisWithSmallestOverlap,
+       mtv;
+
+  // 如果被检测的形状是圆型，则对需要把当前形状传入  
+  var axis = shape.isCircle == true ? this.getAxis(shape) : this.getAxis();
+  axis = shape.isCircle == true ? axis.concat(shape.getAxis(this)) : axis.concat(shape.getAxis());
+
+  for(var i = 0; i < axis.length; i++){
+      var index = i;
+      var oneAxis = axis[i];
+
+      projection1 = this.project(oneAxis);
+      projection2 = shape.project(oneAxis);
+      overlap = projection1.getOverlap(projection2);
+
+      if (overlap === 0) {
+         return new MinimumTranslationVector(undefined, 0);
+      }
+      else {
+         if (overlap < minimumOverlap) {
+            minimumOverlap = overlap;
+            axisWithSmallestOverlap = oneAxis;    
+         }
+      }
+   }
+   mtv = new MinimumTranslationVector(axisWithSmallestOverlap,
+                                     minimumOverlap);
+   return mtv;        
+}
+
+
+Shape.prototype.cover1 = function (shape) {
+  
   var isCover = true
   var _this = this
   var minVector = new Vector()
@@ -122,20 +161,24 @@ Shape.prototype.cover = function (shape) {
   var axis = shape.isCircle == true ? this.getAxis(shape) : this.getAxis();
   axis = shape.isCircle == true ? axis.concat(shape.getAxis(this)) : axis.concat(shape.getAxis());
 
-  axis.map(function (oneAxis, index) {
-    var dot = _this.dotList(oneAxis);
-    var dot1 = shape.dotList(oneAxis);
+  for(var i = 0; i < axis.length; i++){
+      var index = i;
+      var oneAxis = axis[i];
 
-    var coverNum = checkCover(dot, dot1)
-    if (coverNum == false) {
-      isCover = false
-    }else {
+      var dot = _this.dotList(oneAxis);
+      var dot1 = shape.dotList(oneAxis);
+      
+      var coverNum = checkCover(dot, dot1)
+      if (coverNum == false) {
+        isCover = false;
+        break;
+      }            
+      
       if (minDot == undefined || minDot > coverNum) {
         minDot = coverNum;
         minIndex = index;
-      }
+      }    
     }
-  })
 
   return {
     isCover: isCover,
@@ -143,6 +186,7 @@ Shape.prototype.cover = function (shape) {
     normalAxis: axis[minIndex]
   }
 }
+
 Shape.prototype.isPointInPath = function (context, x, y) {
   this.drawLine(context)
   return context.isPointInPath(x, y)
@@ -156,13 +200,13 @@ Shape.prototype.isPointInPath = function (context, x, y) {
 */
 Shape.prototype.reflect = function(normalAxis, context){
   
-  var vx = this.vx;
-  var vy = this.vy;  
+  // var vx = velocity.x;
+  // var vy = velocity.y;  
 
-  var vector = new Vector(vx, vy);
+  var vector = new Vector(velocity.x, velocity.y);
   var unitVector = vector.normal();
     
-  var hypotenuse = vector.hypotenuse(vx, vy);
+  var hypotenuse = vector.hypotenuse(velocity.x, velocity.y);
   
   // var vUnitAxis = new Vector(unitVX, unitVY);    
   var dot = unitVector.dotProduct(normalAxis);
@@ -172,6 +216,99 @@ Shape.prototype.reflect = function(normalAxis, context){
   var unitVX = 2 * dotRatio * normalAxis.x - unitVector.x;  
   var unitVY = 2 * dotRatio * normalAxis.y - unitVector.y;
 
-  this.vx = unitVX * hypotenuse;
-  this.vy = unitVY * hypotenuse;  
+  velocity.x = unitVX * hypotenuse;
+  velocity.y = unitVY * hypotenuse;  
 }
+
+/*
+* 获取形状的边界
+*/
+Shape.prototype.getBounding = function(){
+  var minx = BIG_NUMBER,
+       miny = BIG_NUMBER,
+       maxx = -BIG_NUMBER,
+       maxy = -BIG_NUMBER,
+       point;
+
+   for (var i=0; i < this.points.length; ++i) {
+      point = this.points[i];
+      minx = Math.min(minx,point.x);
+      miny = Math.min(miny,point.y);
+      maxx = Math.max(maxx,point.x);
+      maxy = Math.max(maxy,point.y);
+   }
+
+   return new BoundingBox(minx, miny,
+            parseFloat(maxx - minx),
+            parseFloat(maxy - miny)); 
+
+}
+/*
+* 
+*/
+Shape.prototype.centroid = function () {
+  var pointSum = new Point(0,0);
+  
+  for (var i=0, point; i < this.points.length; ++i) {
+     point = this.points[i];
+     pointSum.x += point.x;
+     pointSum.y += point.y;
+  }
+  return new Point(pointSum.x / this.points.length,
+                   pointSum.y / this.points.length);
+}
+
+Shape.prototype.project = function (axis) {
+  var scalars = [];
+
+  this.points.forEach( function (point) {
+     scalars.push(new Vector(point.x, point.y).dotProduct(axis));
+  });
+
+  return new Projection(Math.min.apply(Math, scalars),
+                        Math.max.apply(Math, scalars));
+};
+
+
+
+
+function BoundingBox(left, top, width, height){
+  this.left = left;
+  this.top = top;
+  this.width = width;
+  this.height = height;
+}
+
+
+// Projections...................................................
+
+var Projection = function (min, max) {
+  this.min = min;
+  this.max = max;
+};
+
+Projection.prototype = {
+  overlaps: function (projection) {
+     return this.max > projection.min && projection.max > this.min;
+  },
+
+  getOverlap: function (projection) {
+     var overlap;
+
+     if (!this.overlaps(projection))
+        return 0;
+     
+     if (this.max > projection.max) {
+        overlap = projection.max - this.min;
+     }
+     else {
+       overlap = this.max - projection.min;
+     }
+     return overlap;
+  }
+};
+
+var MinimumTranslationVector = function (axis, overlap) {
+  this.axis = axis;
+  this.overlap = overlap;
+};

@@ -54,6 +54,56 @@
             };
         };
 
+
+        function checkMTVAxisDirection(mtv, collider, collidee) {
+            var centroid1, centroid2, centroidVector, centroidUnitVector;
+
+            if (mtv.axis === undefined)
+                return;
+            
+            centroid1 = new Vector(collider.centroid()),
+            centroid2 = new Vector(collidee.centroid()),
+
+            centroidVector = centroid2.subtract(centroid1),
+            centroidUnitVector = (new Vector(centroidVector)).normal();
+
+            if (centroidUnitVector.dotProduct(mtv.axis) > 0) {
+                mtv.axis.x = -mtv.axis.x;
+                mtv.axis.y = -mtv.axis.y;
+            }
+        };
+        
+
+        function separate(mtv) {
+            var dx, dy, velocityMagnitude, point;
+
+            if (mtv.axis === undefined) {
+                point = new Point();
+                velocityMagnitude = Math.sqrt(Math.pow(velocity.x, 2) +
+                                                Math.pow(velocity.y, 2));
+
+                point.x = velocity.x / velocityMagnitude;
+                point.y = velocity.y / velocityMagnitude;
+
+                mtv.axis = new Vector(point);
+            }
+            
+            dy = mtv.axis.y * mtv.overlap;
+            dx = mtv.axis.x * mtv.overlap 
+
+            if ((dx < 0 && velocity.x < 0) ||
+                (dx > 0 && velocity.x > 0)) {
+                dx = -dx;
+            }
+
+            if ((dy < 0 && velocity.y < 0) ||
+                (dy > 0 && velocity.y > 0)) {
+                dy = -dy;
+            }
+                
+            shapeBeingDragged.move(dx, dy);
+        }
+
         function detectCollisions() {
             var textY = 30;
             if (shapeBeingDragged == undefined) {
@@ -66,8 +116,8 @@
                 if (shape == shapeBeingDragged) {
                     continue;
                 }
-                var obj = shapeBeingDragged.cover(shape);
-                if (obj.isCover) {                        
+                var mtv = shapeBeingDragged.cover(shape);
+                if (mtv.axis !== undefined) {                        
                     
                     context.font = "18px Align";
                     context.fillStyle = shape.fillStyle;
@@ -77,33 +127,70 @@
                     // shapeBeingDragged.pause();                                    
                     // clearTimeout(handle);
                         
-                        // cancelAnimationFrame(handle);                    
-                        if(isMoved == true){
-                            return; 
-                        }
-                        
-                        //两个物体黏在一起
-                        // shapeBeingDragged.start();
-                        // shapeBeingDragged.move(-obj.minDot, -obj.minDot);
-                        // shapeBeingDragged.pause();
-                        
-                        
-                        //一个物体碰到另一个物体弹开
-                        shapeBeingDragged.reflect(obj.normalAxis, context);                        
-                        isMoved = true;
-                    // }, 1000);
-
-                    setTimeout(function(){                                
-                        isMoved = false;
-                    }, 500);
-
+                        // cancelAnimationFrame(handle);                                        
+                
                     
-                    break;
+                    var dotProductRatio, vdotl, ldotl, point,
+                    velocityVector = new Vector(velocity.x, velocity.y),
+                    velocityUnitVector = velocityVector.normal(),
+                    velocityVectorMagnitude = velocityVector.hypotenuse(),
+                    perpendicular;
+
+                    checkMTVAxisDirection(mtv, shapeBeingDragged, shape);
+
+                    // var minDot = obj.minDot;
+                    var point = new Point();
+
+                    if (mtv.axis !== undefined) {
+                        perpendicular = mtv.axis.perpendicular();
+                    }else {
+                        perpendicular = new Vector(new Point(-velocityUnitVector.y,
+                                                        velocityUnitVector.x));
+                    }
+
+                    vdotl = velocityUnitVector.dotProduct(perpendicular);
+                    ldotl = perpendicular.dotProduct(perpendicular);
+                    dotProductRatio = vdotl / ldotl;
+
+                    point.x = 2 * dotProductRatio * perpendicular.x - velocityUnitVector.x;
+                    point.y = 2 * dotProductRatio * perpendicular.y - velocityUnitVector.y;
+
+                    separate(mtv);
+                                        
+                    velocity.x = point.x * velocityVectorMagnitude;
+                    velocity.y = point.y * velocityVectorMagnitude;
+                    
+                    console.log(velocity.x, velocity.y);
                 }
             }            
             
             return;
         };
+        
+        //判断是否超过边缘
+        function checkEdge(){            
+            var bbox = shapeBeingDragged.getBounding(),
+                right = bbox.left + bbox.width,
+                bottom = bbox.top + bbox.height;
+                
+            if (right > canvas.width || bbox.left < 0) {
+                velocity.x = -velocity.x;
+
+                if (right > canvas.width)
+                    shapeBeingDragged.move(0-(right-canvas.width), 0);
+
+                if (bbox.left < 0)
+                    shapeBeingDragged.move(-bbox.left, 0);
+            }
+            if (bottom > canvas.height || bbox.top < 0) {
+                velocity.y = -velocity.y;
+
+                if (bottom > canvas.height)
+                    shapeBeingDragged.move(0, 0-(bottom-canvas.height));
+                if (bbox.top < 0)
+                    shapeBeingDragged.move(0, -bbox.top);
+            }
+        }
 
         function checkCover(dot, dot1) {
             var max = Math.max.apply(Math, dot);
@@ -168,27 +255,36 @@
         //     var circle = new Circle(point.x, point.y, r);            
         //     shapes.push(circle);
         // })    
-        shapeBeingDragged = shapes[shapes.length - 2];
-        shapeBeingDragged.getAxis(shapes[shapes.length - 1])
-                        
-        function move(){
+        shapeBeingDragged = shapes[3];
+        // shapeBeingDragged.getAxis(shapes[shapes.length - 1])
+        var lastTime;           
+        function move(time){
+
+            if(lastTime == undefined){
+                lastTime = time;
+            }
+
             context.clearRect(0, 0, WIDTH, HEIGHT);
             drawGrid('lightgray', 10, 10);
+            
+            var elapsedTime = parseFloat(time - lastTime) / 1000;
 
-            shapes.map(function(shape){
-                if(shape == shapeBeingDragged){
-                    shapeBeingDragged.move();
-                }
-            });
+            if(shapeBeingDragged != undefined){
+                shapeBeingDragged.move(velocity.x * elapsedTime, velocity.y * elapsedTime);
+            }
+                        
+            detectCollisions();
+            checkEdge();            
             drawShapes();
-            detectCollisions();            
+
+            lastTime = time;
             requestAnimationFrame(move);            
         }
         
-        move();
+        move(0);
         // init();
 
-        document.getElementById("start").onclick = function () {
+        // document.getElementById("start").onclick = function () {
             //  polygonPoints = [
             //  [ new Point(220, 120), new Point(200,170),
             //   new Point(250, 250)],
@@ -196,7 +292,7 @@
             //   new Point(150, 150), new Point(150, 100)]
             // ];
             // init();
-        }
+        // }
 
     </script>
 </body>
