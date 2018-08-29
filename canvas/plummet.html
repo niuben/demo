@@ -91,8 +91,10 @@
             return (x - sx) / LINE * 90;                        
         }            
 
-        function getXYByAngle(angle){
-            
+        function setXYByAngle(angle){
+            var radian = Math.PI / 180 * angle
+            x = sx + LINE * Math.sin(radian);
+            y = POINT_Y + LINE * Math.cos(Math.abs(radian));
         }
 
         function drawLine() {
@@ -127,20 +129,17 @@
         }
 
         function move() {
-            var nowTime = new Date().getTime();
-            // var fps = 1000 / (nowTime - lastTime);
-            var currentAngle = angle * Math.cos(Math.sqrt(G * pixelsPerMeter / LINE) * ((nowTime - startTime) / 1000)); 
-            // console.log("fps", fps, "currentAngle", currentAngle);        
-            currentAngle = Math.PI / 180 * currentAngle;
-
-            x = sx + LINE * Math.sin(currentAngle);
-            y = POINT_Y + LINE * Math.cos(currentAngle);
-
+            var nowTime = new Date().getTime();            
+            var currentAngle = angle * Math.cos(Math.sqrt(G * pixelsPerMeter / LINE) * ((nowTime - startTime) / 1000));                    
+            setXYByAngle(currentAngle);            
             lastTime = nowTime;
         }   
 
         //用户交互区域
         document.onmousedown = function (e) {
+            if (isMoving == true) {
+                return;
+            }            
             var pos = windowToCanvas(e);
             if(pos.x < x + RADIUS && pos.x > x - RADIUS && pos.y < y + RADIUS && pos.y > y - RADIUS){
                 sx = pos.x;
@@ -151,34 +150,26 @@
         }
 
         document.onmousemove = function (e) {
-
             if (isDraging != true || isMoving == true) {
                 return;
             }
-            
-            var pos = windowToCanvas(e);
-            x = pos.x;            
-            x = Math.abs(x - sx) > LINE ? (x > sx ? sx + LINE : sx - LINE) : x;
 
-            angle = getAngle(x);
-            y = LINE * Math.cos(Math.PI / 180 * Math.abs(angle)) + POINT_Y;            
+            var pos = windowToCanvas(e);            
+            angle = getAngle(pos.x);            
+            setXYByAngle(angle);          
 
             drawAll();
         }
 
         document.onmouseup = function (e) {
-            
+            if (isMoving == true) {
+                return;
+            }
+
             startTime = lastTime = new Date().getTime();
             isDraging = false;
             isMoving = true;
-            animate();
-
-            // drawAll();
-            // reset();
-            // animate();
-
-            // vx = (ex - sx) * multiple;
-            // vy = (ey - sy) * multiple;
+            animate();            
         }
 
         drawAll();
