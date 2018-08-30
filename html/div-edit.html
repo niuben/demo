@@ -1,0 +1,32 @@
+<html>
+
+<head>
+    <style>
+        .image-cover {
+            min-height: 1px;
+        }
+    </style>
+    <title>禁用IE图片缩放</title>
+</head>
+
+<body>
+    <div id="editer" contenteditable="true">
+        <div class="image-cover">
+            <img id="img" src="https://www.baidu.com/img/bd_logo1.png?where=super" />
+        </div>
+    </div>
+    <script>
+        // var comp = document.getElementById('img');
+        // comp.oncontrolselect = function () { return false; }
+        // comp.onresize = function () { return false; }
+
+        function controlselectHandler(evt) {
+            evt.preventDefault();
+        }
+        document.body.addEventListener('mscontrolselect', controlselectHandler);
+
+    </script>
+    </div>
+</body>
+
+</html>
