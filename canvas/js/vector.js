@@ -16,9 +16,9 @@ Vector.prototype.dotProduct = function (vector) {
 
 // 法向量
 Vector.prototype.normal = function () {
-  var x = this.y
-  var y = 0 - this.x
-  var hypotenuse = this.hypotenuse()
+  var x = this.x
+  var y = this.y
+  var hypotenuse = this.hypotenuse();
   x = x / hypotenuse
   y = y / hypotenuse
 

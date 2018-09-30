@@ -118,13 +118,13 @@ Shape.prototype.dotList = function (axis) {
 Shape.prototype.cover = function (shape) {
     
   var minimumOverlap = BIG_NUMBER,
-       overlap,
-       axisWithSmallestOverlap,
-       mtv;
+      overlap,
+      axisWithSmallestOverlap,
+      mtv;
 
   // 如果被检测的形状是圆型，则对需要把当前形状传入  
-  var axis = shape.isCircle == true ? this.getAxis(shape) : this.getAxis();
-  axis = shape.isCircle == true ? axis.concat(shape.getAxis(this)) : axis.concat(shape.getAxis());
+  var axis = this.isCircle == true ? this.getAxis(shape) : this.getAxis();
+  axis = this.isCircle == true ? axis.concat(shape.getAxis(this)) : axis.concat(shape.getAxis());
 
   for(var i = 0; i < axis.length; i++){
       var index = i;
@@ -149,43 +149,6 @@ Shape.prototype.cover = function (shape) {
    return mtv;        
 }
 
-
-Shape.prototype.cover1 = function (shape) {
-  
-  var isCover = true
-  var _this = this
-  var minVector = new Vector()
-  var minDot, minIndex;
-
-  // 如果被检测的形状是圆型，则对需要把当前形状传入  
-  var axis = shape.isCircle == true ? this.getAxis(shape) : this.getAxis();
-  axis = shape.isCircle == true ? axis.concat(shape.getAxis(this)) : axis.concat(shape.getAxis());
-
-  for(var i = 0; i < axis.length; i++){
-      var index = i;
-      var oneAxis = axis[i];
-
-      var dot = _this.dotList(oneAxis);
-      var dot1 = shape.dotList(oneAxis);
-      
-      var coverNum = checkCover(dot, dot1)
-      if (coverNum == false) {
-        isCover = false;
-        break;
-      }            
-      
-      if (minDot == undefined || minDot > coverNum) {
-        minDot = coverNum;
-        minIndex = index;
-      }    
-    }
-
-  return {
-    isCover: isCover,
-    minDot: Math.ceil(minDot),
-    normalAxis: axis[minIndex]
-  }
-}
 
 Shape.prototype.isPointInPath = function (context, x, y) {
   this.drawLine(context)
@@ -243,6 +206,7 @@ Shape.prototype.getBounding = function(){
             parseFloat(maxy - miny)); 
 
 }
+
 /*
 * 
 */
@@ -258,6 +222,7 @@ Shape.prototype.centroid = function () {
                    pointSum.y / this.points.length);
 }
 
+//判断一个向量和一个多边形是否重合
 Shape.prototype.project = function (axis) {
   var scalars = [];
 
@@ -268,8 +233,6 @@ Shape.prototype.project = function (axis) {
   return new Projection(Math.min.apply(Math, scalars),
                         Math.max.apply(Math, scalars));
 };
-
-
 
 
 function BoundingBox(left, top, width, height){
@@ -289,7 +252,7 @@ var Projection = function (min, max) {
 
 Projection.prototype = {
   overlaps: function (projection) {
-     return this.max > projection.min && projection.max > this.min;
+     return this.max > projection.min && this.min < projection.max;
   },
 
   getOverlap: function (projection) {
@@ -300,9 +263,8 @@ Projection.prototype = {
      
      if (this.max > projection.max) {
         overlap = projection.max - this.min;
-     }
-     else {
-       overlap = this.max - projection.min;
+     }else{
+        overlap = this.max - projection.min;
      }
      return overlap;
   }

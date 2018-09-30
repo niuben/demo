@@ -2,6 +2,7 @@
 var WIDTH = 800;
 var HEIGHT = 400;
 var BIG_NUMBER = 1000000;
+
 var polygonPoints = [
   [ new Point(250, 150), new Point(250, 200),
     new Point(300, 200) ],
@@ -24,13 +25,15 @@ var velocity = {
   x: 350,
   y: 190
 };
-var polygonStrokeStyles = ['blue', 'yellow', 'red', 'red', 'black']
+
+var polygonStrokeStyles = ['blue'];
 var polygonFillStyles = ['rgba(255,255,0,0.7)',
 'rgba(100,140,230,0.6)',
 'rgba(255,255,255,0.6)',
 'aqua',
-'rgba(255,0,255,0.8)']
-var circlePoints = [[new Point(200, 100), 40]]
+'rgba(255,0,255,0.8)'];
+
+var circlePoints = [[new Point(200, 100), 20]]
 var circleStrokeStyle = 'yellow'
 var circleFillStyle = 'rgba(255,0,255,0.8)'
 

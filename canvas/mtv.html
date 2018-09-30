@@ -25,9 +25,9 @@
     </script>
     <script>
         /*
-* 功能：拖动两个多边形，如果两个多边形发生碰撞则显示当前已碰撞。
-* 
-*/
+        * 功能：拖动两个多边形，如果两个多边形发生碰撞则显示当前已碰撞。
+        * 
+        */
 
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
@@ -42,7 +42,6 @@
             });
         }
         
-
         function windowToCanvas(e) {
             var x = e.x || e.clientX,
                 y = e.y || e.clientY,
@@ -109,7 +108,6 @@
             if (shapeBeingDragged == undefined) {
                 return;
             }
-
             
             for(var i = 0; i < shapes.length; i++){
                 var shape = shapes[i];            
@@ -118,25 +116,23 @@
                 }
                 var mtv = shapeBeingDragged.cover(shape);
                 if (mtv.axis !== undefined) {                        
-                    
+                    console.log("cover!!");                    
                     context.font = "18px Align";
                     context.fillStyle = shape.fillStyle;
                     context.fillText('碰撞', 20, textY);
                     textY += 40;
                     
                     // shapeBeingDragged.pause();                                    
-                    // clearTimeout(handle);
-                        
-                        // cancelAnimationFrame(handle);                                        
-                
-                    
+                    // clearTimeout(handle);                        
+                    // cancelAnimationFrame(handle);                                                            
+
                     var dotProductRatio, vdotl, ldotl, point,
                     velocityVector = new Vector(velocity.x, velocity.y),
                     velocityUnitVector = velocityVector.normal(),
                     velocityVectorMagnitude = velocityVector.hypotenuse(),
                     perpendicular;
 
-                    checkMTVAxisDirection(mtv, shapeBeingDragged, shape);
+                    // checkMTVAxisDirection(mtv, shapeBeingDragged, shape);
 
                     // var minDot = obj.minDot;
                     var point = new Point();
@@ -155,12 +151,10 @@
                     point.x = 2 * dotProductRatio * perpendicular.x - velocityUnitVector.x;
                     point.y = 2 * dotProductRatio * perpendicular.y - velocityUnitVector.y;
 
-                    // separate(mtv);
+                    separate(mtv);
                                         
                     velocity.x = point.x * velocityVectorMagnitude;
-                    velocity.y = point.y * velocityVectorMagnitude;
-                    
-                    console.log(velocity.x, velocity.y);
+                    velocity.y = point.y * velocityVectorMagnitude;                                        
                 }
             }            
             
@@ -231,11 +225,11 @@
             });
         }
 
-        canvas.onmousemove = function (e) {
-
+        canvas.onmousemove = function(e){
+        
         }
 
-        canvas.onmouseup = function (e) {
+        canvas.onmouseup = function(e){
             shapeBeingDragged = undefined;
         }
 
@@ -249,13 +243,13 @@
             })                     
             shapes.push(shape);
         });
-        // circlePoints.map(function (points) {
-        //     var point = points[0]; //圆心坐标;
-        //     var r = points[1];
-        //     var circle = new Circle(point.x, point.y, r);            
-        //     shapes.push(circle);
-        // })    
-        shapeBeingDragged = shapes[3];
+        circlePoints.map(function (points) {
+            var point = points[0]; //圆心坐标;
+            var r = points[1];
+            var circle = new Circle(point.x, point.y, r);            
+            shapes.push(circle);
+        })    
+        shapeBeingDragged = shapes[2];
         // shapeBeingDragged.getAxis(shapes[shapes.length - 1])
         var lastTime;           
         function move(time){
@@ -268,9 +262,8 @@
             drawGrid('lightgray', 10, 10);
             
             var elapsedTime = parseFloat(time - lastTime) / 1000;
-
             if(shapeBeingDragged != undefined){
-                shapeBeingDragged.move(velocity.x * elapsedTime, velocity.y * elapsedTime);
+                shapeBeingDragged.move(velocity.x * elapsedTime  , velocity.y * elapsedTime);
             }
                         
             detectCollisions();
