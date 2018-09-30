@@ -13,18 +13,18 @@ Circle.prototype.getAxis = function (shape) {
 
   var x = this.x
   var y = this.y
-  var maxIndex = 0;
-  var maxDistance = 0;
-  shape.points.map(function (point, index) {
+  var minIndex = 0;
+  var minDistance = BIG_NUMBER;
+  shape.points.map(function (point, index) {    
     var distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2))
-    if (distance > maxDistance) {
-      maxDistance = distance
-      maxIndex = index
+    if (distance < minDistance) {
+      minDistance = distance
+      minIndex = index
     }
   })
 
-  var maxPoint = shape.points[maxIndex];
-  var vector = new Vector(maxPoint.x - x, maxPoint.y - y);
+  var minPoint = shape.points[minIndex];
+  var vector = new Vector(minPoint.x - x, minPoint.y - y);
   axis.push(vector.normal())
   console.log("shape", axis);
   return axis;

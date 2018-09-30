@@ -14,7 +14,7 @@ Vector.prototype.dotProduct = function (vector) {
   return this.x * vector.x + this.y * vector.y
 }
 
-// 法向量
+// 单位向量
 Vector.prototype.normal = function () {
   var x = this.x
   var y = this.y
@@ -26,6 +26,7 @@ Vector.prototype.normal = function () {
   return vector
 }
 
+//垂直向量
 Vector.prototype.perpendicular =  function () {
   var v = new Vector();
   v.x = this.y;
