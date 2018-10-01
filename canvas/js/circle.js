@@ -24,9 +24,12 @@ Circle.prototype.getAxis = function (shape) {
   })
 
   var minPoint = shape.points[minIndex];
-  var vector = new Vector(minPoint.x - x, minPoint.y - y);
-  axis.push(vector.normal())
-  console.log("shape", axis);
+  var v1 = new Vector(minPoint.x, minPoint.y);
+  var v2 = new Vector(x, y);
+
+  var surfaceVector = v2.subtract(v1);
+  axis.push(surfaceVector.perpendicular().normal());
+  
   return axis;
 
   // var v1 = new Vector(this.points[length -1].x, this.points[length -1].y);
@@ -35,18 +38,21 @@ Circle.prototype.getAxis = function (shape) {
   // surfaceVector = v2.subtract(v1);
   // axes.push(surfaceVector.perpendicular().normal());
   // return axis;
-
 }
 
 //判断一个向量和一个多边形是否重合
 Circle.prototype.project = function (axis) {
-  var scalars = [];
+  // var scalars = [];
 
   
-  scalars.push(new Vector(this.x, this.y).dotProduct(axis));  
+  // scalars.push(new Vector(this.x, this.y).dotProduct(axis));  
 
-  return new Projection(Math.min.apply(Math, scalars),
-                        Math.max.apply(Math, scalars));
+  // return new Projection(Math.min.apply(Math, scalars),
+  //                       Math.max.apply(Math, scalars));
+
+  var scalars = this.dotList(axis);
+  return new Projection(scalars[0], scalars[1]);
+
 };
 
 
@@ -58,6 +64,11 @@ Circle.prototype.dotList = function (axis) {
   var maxDot = dot + this.r
   return [minDot, maxDot]
 }
+
+Circle.prototype.drawLine = function(context) {
+  context.beginPath();
+  context.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+};
 
 Circle.prototype.stroke = function (context) {
   context.beginPath()
@@ -78,6 +89,10 @@ Circle.prototype.fill = function (context) {
 }
 
 Circle.prototype.move = function(x, y){
+  if (this.isPause == true) {
+    return;
+  }
+
   this.x += x;
   this.y += y;
 }

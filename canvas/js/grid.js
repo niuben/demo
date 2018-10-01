@@ -9,7 +9,7 @@ function drawGrid (color, stepx, stepy) {
   context.strokeStyle = color
   context.fillStyle = '#ffffff'
   context.lineWidth = 0.5
-  context.fillRect(0, 0, context.canvas.width, context.canvas.height)
+  context.fillRect(0, 0, context.canvas.width, context.canvas.height - 1)
 
   for (var i = stepx + 0.5; i < context.canvas.width; i += stepx) {
     context.beginPath();

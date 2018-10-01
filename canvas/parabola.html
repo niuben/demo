@@ -170,6 +170,9 @@
             x += vx / fps;
                                     
             lastTime = nowTime;            
+
+            
+
         }
 
         function reset(){
@@ -215,22 +218,21 @@
 
         //判断是否重合
         function checkRefect(){
-            var refectY = BUCKET_Y;
+            var refectY = BUCKET_Y + 10;
             //去掉图片阴影的部分；
             
             if(y < refectY){
-                isRefect = 0;
+                // isRefect = 0;
+                return false;
             }
             // if(y < refectY || isRefect == false){
             //     return false;
             // }
 
-            // if(y > refectY){
-            if(y > refectY && x > BUCKET_X + (BUCKET_WIDTH/19 * 10) && x < BUCKET_X + BUCKET_WIDTH && isRefect == false){                
+            if(y > refectY && y < BUCKET_Y + BUCKET_HEIGHT / 3 && x > BUCKET_X + (BUCKET_WIDTH / 19 * 8) && x < BUCKET_X + BUCKET_WIDTH){                
                 return true;
             }
             
-            // isRefect = false;            
             return false;                 
         }
 

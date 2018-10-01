@@ -3,6 +3,7 @@
 <meta charset="utf-8" />
 
 <head>
+    <title>碰撞检测</title>
     <style>
         canvas {
             margin-top: 15px;
@@ -122,9 +123,11 @@
                     context.fillText('碰撞', 20, textY);
                     textY += 40;
                     
+                    // separate(mtv);                                                          
                     // shapeBeingDragged.pause();                                    
                     // clearTimeout(handle);                        
-                    // cancelAnimationFrame(handle);                                                            
+                    // cancelAnimationFrame(handle); 
+                    // return;
 
                     var dotProductRatio, vdotl, ldotl, point,
                     velocityVector = new Vector(velocity.x, velocity.y),
@@ -214,14 +217,15 @@
             var x = pos.x;
             var y = pos.y;
 
-            shapes.map(function (shape) {
-                if (shape.isPointInPath(context, x, y)) {
-                    shapeBeingDragged = shape;
-                    mousedown = {
-                        x: x,
-                        y: y
+            shapes.map(function (chooseShape) {            
+                if (chooseShape.isPointInPath(context, x, y)) {                    
+                    shapeBeingDragged = chooseShape;
+                    velocity = {
+                        x: 350,
+                        y: 190
                     };
-                }
+                    move(lastTime);                    
+                }                
             });
         }
 
@@ -230,7 +234,7 @@
         }
 
         canvas.onmouseup = function(e){
-            shapeBeingDragged = undefined;
+            // shapeBeingDragged = undefined;
         }
 
 
@@ -249,7 +253,7 @@
             var circle = new Circle(point.x, point.y, r);            
             shapes.push(circle);
         })    
-        shapeBeingDragged = shapes[5];
+        shapeBeingDragged = shapes[1];
         // shapeBeingDragged.getAxis(shapes[shapes.length - 1])
         var lastTime;           
         function move(time){
@@ -271,7 +275,7 @@
             drawShapes();
 
             lastTime = time;
-            requestAnimationFrame(move);            
+            handle = requestAnimationFrame(move);            
         }
         
         move(0);
