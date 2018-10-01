@@ -1,0 +1,12 @@
+{
+    "baseDir": "./",
+    "includeNpm": true,
+    "showFileExtension": true,
+    "fontSize": "10px",
+    "graphVizOptions": {
+        "G": {
+            "rankdir": "LR"
+        }
+    },
+    "graphVizPath": "img"
+}
