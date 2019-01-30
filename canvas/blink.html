@@ -1,0 +1,61 @@
+<html>
+<head>
+    <style>
+        .edit {
+            padding: 10px;
+            height: 500px;
+            border: 1px solid #000;
+        }
+    </style>
+    <title>眨眼睛</title>
+</head>
+
+<body>
+    <canvas width="800" height="800" id="dog" style="background:black"></canvas>
+    <script>
+        var canvas = document.getElementById("dog");
+        var context = canvas.getContext("2d");
+        var img = new Image();
+        img.src = "./static/dog.jpg";    
+        img.onload = function(){
+            // context.drawImage(img, 0, 0, 800, 800);
+
+            //
+            var centerX = canvas.width/2;
+            var centerY = canvas.height/2;
+            //设置角度值，同时也就眼睛的横坐标长度
+            var angle = 100;
+            //因为眨眼采用的sin()函数组成，所以其自然有幅值这一个属性。
+            var amplitude = 30;
+            //创建一个用于保存幅值的变化的变量，采用amplitude的缩写ampl，便于认识 ^_^
+            var ampl = 20;
+            
+            // context.strokeStyle = "#FFF";
+
+            // for (var i = 0; i < angle; i++) {
+            //     context.moveTo(centerX - angle / 2 + i, centerY-30);
+            //     context.lineTo(centerX - angle / 2 + i, centerY-(Math.floor(Math.sin(Math.PI*i/angle)*ampl)));
+            //     context.moveTo(centerX - angle / 2 + i, centerY+30);
+            //     context.lineTo(centerX - angle / 2 + i, centerY+(Math.floor(Math.sin(Math.PI*i/angle)*ampl)));
+
+            //     context.stroke();                                                                           
+            //     context.fill();
+            // }
+            
+            // context.strokeStyle="red";
+            context.save();
+            var pattern = context.createPattern(img, "no-repeat");0            
+            context.fillStyle = pattern;
+            // context.restore();
+            context.rect(0, 0, 150, 150);
+            context.clip();
+
+            // context.translate(100, 100);
+            context.drawImage(img, 850, 850, 140, 140, 0, 0, 3024, 4032);
+            // context.fill();
+
+        }    
+
+    </script>
+</body>
+</html>
