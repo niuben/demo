@@ -19,35 +19,35 @@
     img.onload = function(){            
       
     function lottery(index, posX, posY){
-            // i = i + 5;
-            // i = i == 360 ? 0 : i;        
-            ctx.clearRect(0, 0, 700, 700);
-            for(var n = 0; n < 6; n++){
+        // i = i + 5;
+        // i = i == 360 ? 0 : i;        
+        ctx.clearRect(0, 0, 700, 700);
+        for(var n = 0; n < 6; n++){
 
-                if(n == index){
+            if(n == index){
                 continue;
-                }
-                
-                var _img = i < 0 ? img1 : img;          
-                ctx.save();          
-                
-                x = n % 3 * 250;          
-                y = Math.floor(n/3) * 350;
-                
-                ctx.translate(x, y);
-                ctx.drawImage(_img, 0, 0, 200, 300);          
-                ctx.restore();
-
             }
-            ctx.save();
-            ctx.translate(posX, posY);
-            console.log(posX, posY);
-
+            
+            var _img = i < 0 ? img1 : img;          
+            ctx.save();          
+            
+            x = n % 3 * 250;          
+            y = Math.floor(n/3) * 350;
+            
+            ctx.translate(x, y);
             ctx.drawImage(_img, 0, 0, 200, 300);          
             ctx.restore();
-            //翻转图片
-            // requestAnimationFrame(draw);
+
         }
+        ctx.save();
+        ctx.translate(posX, posY);
+        console.log(posX, posY);
+
+        ctx.drawImage(_img, 0, 0, 200, 300);          
+        ctx.restore();
+        //翻转图片
+        // requestAnimationFrame(draw);
+    }
 
     var unit = 10;    
     var obj = {}
@@ -252,16 +252,15 @@
         ctx.translate(100, 150);
         // ctx.drawImage(img, 0, 0, 200, 300);
         if( i == 0 ){
-            // ctx.rotate(-180 * Math.PI / 180);          
+            // ctx.rotate(-180 * Math.PI / 180);        
         }
             
         ctx.scale(i , 1);
         if( i < 0){
             ctx.scale(-1 , 1);
         }
-            
         ctx.drawImage(_img, -100, -150, 200, 300);
-        
+
         //翻转图片
         ctx.restore();
         requestAnimationFrame(draw);

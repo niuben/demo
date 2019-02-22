@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="./dist/face-api.js"></script>    
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+        canvas {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+    <body>
+        <!-- <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1550743229425&di=5ea5d6aa49f1e7b98646bf2744365896&imgtype=0&src=http%3A%2F%2Fpic9.nipic.com%2F20100915%2F2269715_143654033837_2.jpg" id="myImg" alt=""/> -->
+        <img src="./img/golden.png" id="myImg" alt=""/>
+        <canvas id="myCanvas"/>
+        <script>
+            async function run(){
+                await faceapi.loadSsdMobilenetv1Model("./weights");                
+                await faceapi.loadFaceLandmarkModel('/weights');
+                // await faceapi.nets.ssdMobilenetv1.loadFromUri("./weights");
+                console.log(faceapi.nets);
+                
+                const input = document.getElementById("myImg");                
+                
+                const detections = await faceapi.detectAllFaces(input);
+                const detectionsForSize = faceapi.resizeResults(detections, {width:input.width, height:input.height});
+                
+                const detectionsWithLandmarks = await faceapi.detectAllFaces(input).withFaceLandmarks();                
+                const detectionsWithLandmarksForSize = await faceapi.resizeResults(detectionsWithLandmarks, { width: input.width, height: input.height })                
+
+                const canvas = document.getElementById("myCanvas");
+                canvas.width = input.width;
+                canvas.height = input.height;
+
+
+                faceapi.drawDetection(canvas, detectionsForSize, {
+                    widthScore: true
+                });
+
+                // faceapi.drawLandmarks(canvas, detectionsWithLandmarksForSize, {
+                //     drawLines: true
+                // });
+                var points =  detectionsWithLandmarksForSize[0].landmarks.positions
+                drawPoints(points);
+            }
+
+            var canvas = document.getElementById('myCanvas');
+            var ctx = canvas.getContext('2d');
+            
+            function drawPoints(poionts){
+                
+                ctx.fontSize = 10;
+                poionts.forEach((point, index)=>{
+                    ctx.beginPath();
+                    ctx.arc(point._x, point._y, 1, 0, 2 * Math.PI);
+                    ctx.strokeText(index + 1, point._x, point._y - 5);
+                    ctx.stroke();
+                });
+            }
+
+            window.onload = function(){
+                run();
+            }            
+        </script>
+  </body>  
+</html>

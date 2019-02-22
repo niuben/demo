@@ -1,61 +1,162 @@
 <html>
-<head>
+  <head>
     <style>
-        .edit {
-            padding: 10px;
-            height: 500px;
-            border: 1px solid #000;
-        }
+      .edit {
+        padding: 10px;
+        height: 500px;
+        border: 1px solid #000;
+      }
     </style>
     <title>眨眼睛</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <canvas width="800" height="800" id="dog" style="background:black"></canvas>
+    <script src="./js/base.js"></script>
     <script>
-        var canvas = document.getElementById("dog");
-        var context = canvas.getContext("2d");
-        var img = new Image();
-        img.src = "./static/dog.jpg";    
-        img.onload = function(){
-            // context.drawImage(img, 0, 0, 800, 800);
+      var WIDTH = 800;
+      var HEIGHT = 800;
 
-            //
-            var centerX = canvas.width/2;
-            var centerY = canvas.height/2;
+      var canvas = document.getElementById("dog");
+      var context = canvas.getContext("2d");
+
+      var img = new Image();
+      img.src = "./static/dog.jpg";
+      img.onload = function() {
+        // context.drawImage(img, 0, 0, 800, 800);
+
+        var scale = this.height / HEIGHT;
+        var imgHeight = HEIGHT;
+        var imgWidth = this.width / scale;
+
+        console.log(imgHeight, imgWidth);
+
+        // context.strokeStyle="red";
+        // var pattern = context.createPattern(img, "no-repeat");0
+        // context.fillStyle = pattern;
+        // context.restore();
+        
+        var multiple = 1;
+        // scale = 1;
+        // context.save();
+        // context.rect(0, 0, 30 * multiple, 24 * multiple);
+        // context.clip();
+        // context.drawImage(
+        //   img,
+        //   173 * scale,
+        //   176 * scale,
+        //   30 * scale * multiple,
+        //   24 * scale * multiple,
+        //   0,
+        //   0,
+        //   30 * multiple,
+        //   24 * multiple
+        // );
+        // context.restore();
+        setInterval(animate, 30);
+        // context.fill();
+        // context.translate(100, 100);
+        // context.fill();
+      
+
+        //眨眼睛
+        function blink() {
+            
+            var centerX = canvas.width / 2;
+            var centerY = canvas.height / 2;
             //设置角度值，同时也就眼睛的横坐标长度
-            var angle = 100;
-            //因为眨眼采用的sin()函数组成，所以其自然有幅值这一个属性。
-            var amplitude = 30;
-            //创建一个用于保存幅值的变化的变量，采用amplitude的缩写ampl，便于认识 ^_^
-            var ampl = 20;
-            
-            // context.strokeStyle = "#FFF";
+            var angle = 30;    
+            var startX = centerX - angle / 2;
+            var startY = centerY - 30;
 
-            // for (var i = 0; i < angle; i++) {
-            //     context.moveTo(centerX - angle / 2 + i, centerY-30);
-            //     context.lineTo(centerX - angle / 2 + i, centerY-(Math.floor(Math.sin(Math.PI*i/angle)*ampl)));
-            //     context.moveTo(centerX - angle / 2 + i, centerY+30);
-            //     context.lineTo(centerX - angle / 2 + i, centerY+(Math.floor(Math.sin(Math.PI*i/angle)*ampl)));
+            context.strokeStyle = "#000000";
+            context.drawImage(
+                img,
+                173 * scale,
+                176 * scale,
+                30 * scale * multiple,
+                24 * scale * multiple,
+                startX , 
+                startY + angle/2,
+                30 * multiple,
+                24 * multiple
+            );            
 
-            //     context.stroke();                                                                           
-            //     context.fill();
-            // }
-            
-            // context.strokeStyle="red";
+            for (var i = 0; i < angle; i++) {
+                context.beginPath();
+                context.moveTo(startX + i, centerY - 30);
+                context.lineTo(
+                    startX + i,
+                    centerY - Math.floor(Math.sin((Math.PI * i) / angle) * ampl)
+                );
+                context.moveTo(startX + i, centerY + 30);
+                context.lineTo(
+                    startX + i,
+                    centerY + Math.floor(Math.sin((Math.PI * i) / angle) * ampl)
+                );
+                context.stroke();
+                // context.clip();
+            }            
+        }
+
+        //灰眼球的半径      
+        //因为眨眼采用的sin()函数组成，所以其自然有幅值这一个属性。
+        var ampl = 40;
+        var flag = true;
+        var amplitude = 30;
+        function animate(){
+            if (flag) {
+                ampl++;
+                if (ampl >= amplitude) {
+                    flag = false;
+                }
+            } else {
+                ampl--;
+                if (ampl <= 0) {
+                    flag = true;
+                }
+            }
+
+            context.clearRect(0, 0, WIDTH, HEIGHT);
+            context.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+            blink();
+            // arc();            
+        }
+
+        function arc(){
+            var startX = 100;
+            var startY = 100;
+            var radius = ampl * multiple / 2;
+
+            context.beginPath();
             context.save();
-            var pattern = context.createPattern(img, "no-repeat");0            
-            context.fillStyle = pattern;
-            // context.restore();
-            context.rect(0, 0, 150, 150);
+            context.strokeStyle = "#000";
+            context.arc(startX, startY, radius, 0, 2 * Math.PI);
+            // context.stroke();
             context.clip();
+            context.drawImage(
+                img,
+                173 * scale,
+                176 * scale,
+                30 * scale * multiple,
+                24 * scale * multiple,
+                startX - (30 * multiple / 2),
+                startY - (24 * multiple / 2),
+                30 * multiple,
+                24 * multiple
+            );
+            context.restore();
+        }
+    };
 
-            // context.translate(100, 100);
-            context.drawImage(img, 850, 850, 140, 140, 0, 0, 3024, 4032);
-            // context.fill();
 
-        }    
-
+    document.onclick = function(e) {
+        var pos = windowToCanvas(e);
+        var ex = pos.x;
+        var ey = pos.y;        
+    };
+      
     </script>
-</body>
+  </body>
 </html>

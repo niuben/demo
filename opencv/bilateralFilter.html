@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>code</title>
+  </head>
+  <body>    
+    <div>
+      <div class="inputoutput">
+        <img id="imageSrc" alt="No Image" src="./img/face.jpg" />              
+        <canvas id="canvasInput"></canvas>
+        <div class="caption">canvasOutput</div>
+        <canvas id="canvasOutput"></canvas>
+
+        <div class="caption">Image Filter</div>
+        <canvas id="canvasOutput"></canvas>                
+        
+      </div>
+    </div>
+    <script
+      async
+      src="opencv.js"
+      onload="onOpenCvReady();"
+      type="text/javascript"
+    ></script>
+    <script type="text/javascript">
+        function onOpenCvReady(){
+
+            // cv.imshow("canvasInput", img);
+            
+            // let src = cv.imread("canvasInput");
+            let src = cv.imread("imageSrc", 1);
+            cv.cvtColor(src, src, cv.COLOR_RGBA2RGB, 0);
+            let dst = new cv.Mat();            
+            cv.bilateralFilter(src, dst, 19, 75, 75, cv.BORDER_DEFAULT);
+            cv.imshow("canvasOutput", dst);            
+            src.delete();
+            
+            //图像高亮
+            // var dst = cv.Mat.zeros(src.size);
+            
+
+        }
+
+    </script>
+  </body>
+</html>
