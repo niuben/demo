@@ -37,7 +37,6 @@
         var POINT_X = MAX_WIDTH / 2;
         var POINT_Y = 30;
 
-
         var LINE = 300;
 
         //大圆
@@ -129,9 +128,9 @@
         }
 
         function move() {
-            var nowTime = new Date().getTime();            
-            var currentAngle = angle * Math.cos(Math.sqrt(G * pixelsPerMeter / LINE) * ((nowTime - startTime) / 1000));                    
-            setXYByAngle(currentAngle);            
+            var nowTime = new Date().getTime();
+            var currentAngle = angle * Math.cos(Math.sqrt(G * pixelsPerMeter / LINE) * ((nowTime - startTime) / 1000));
+            setXYByAngle(currentAngle);
             lastTime = nowTime;
         }   
 
@@ -146,7 +145,6 @@
                 sy = pos.y;
                 isDraging = true;
             }
-
         }
 
         document.onmousemove = function (e) {

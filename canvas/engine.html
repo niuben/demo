@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <style>      
+    </style>
+    <title>引擎</title>
+  </head>
+
+  <body>
+    <canvas width="800" height="800" id="dog"></canvas>
+    <script src="./js/base.js"></script>    
+    <script src="./sprite/conf.js"></script>    
+    <script src="./sprite/requestNextAnimationFrame.js"></script>    
+    <script src="./sprite/gameEngine.js"></script>
+
+    <script src="./sprite/sprite.js"></script>
+    <script src="./sprite/spritesheetpainter.js"></script>
+    <script src="./sprite/imagepainter.js"></script>
+    <script src="./sprite/person.js"></script>
+    <script src="./sprite/tree.js"></script>
+    <script >    
+        var game = new Game("run", "dog");
+        // var context = document.getElementById("dog").getContext("2d");
+        
+        game.paintUnderSprites = function(){
+            var context = game.context;
+            // setInterval(function(){            
+                context.clearRect(0, 0, 800, 800);
+                var now = new Date().getTime();            
+            
+                person.update(context, now);                
+                person.paint(context);
+                tree.paint(context);
+            // }, 20);
+        }
+        
+        setTimeout(function(){
+            game.start();
+        }, 300);
+    </script>
+    
+  </body>
+</html>

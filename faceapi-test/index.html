@@ -17,12 +17,12 @@
 </head>
     <body>
         <!-- <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1550743229425&di=5ea5d6aa49f1e7b98646bf2744365896&imgtype=0&src=http%3A%2F%2Fpic9.nipic.com%2F20100915%2F2269715_143654033837_2.jpg" id="myImg" alt=""/> -->
-        <img src="./img/golden.png" id="myImg" alt=""/>
+        <img src="./img/surprised.jpg" id="myImg" alt=""/>
         <canvas id="myCanvas"/>
         <script>
             async function run(){
                 await faceapi.loadSsdMobilenetv1Model("./weights");                
-                await faceapi.loadFaceLandmarkModel('/weights');
+                await faceapi.loadFaceLandmarkModel('./weights');
                 // await faceapi.nets.ssdMobilenetv1.loadFromUri("./weights");
                 console.log(faceapi.nets);
                 
