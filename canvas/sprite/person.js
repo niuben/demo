@@ -29,11 +29,7 @@ var run = {
   lastAdVance: 0,
   INTERVAL: 200,
   execute: function(sprite, context, now){
-
-    if(this.animating == false){
-      return;
-    }
-    
+        
     if(now - this.lastAdVance < this.INTERVAL){
       return;
     }
@@ -43,7 +39,7 @@ var run = {
 }
 
 var jump = {
-  animating: false,
+  animating: true,
   startTime: null,
   lastAdVance: null,
   INTERVAL: 50,  
@@ -66,18 +62,28 @@ var jump = {
     }
     
     var duration = (now - this.startTime) / 1000;
-    sprite.vy = this.v0 - (G * PixelsPerMeter * duration);  
+    sprite.vy = this.v0 - (G * PixelsPerMeter * duration);
     sprite.y -= sprite.vy;
     
-    if(sprite.y > this.lastY){
-      sprite.y = this.lastY;      
+    if(sprite.y > this.lastY){            
+      sprite.y = this.lastY;
+      this.stop();      
     }
     this.lastAdVance = now;
   },
-  reset: function(){ //重置
+  stop: function(){
+    this.animating = false;
+  },
+  start: function(sprite){
+    if(this.animating == false){
+      this.reset(sprite);
+      this.animating = true;
+    }
+  },
+  reset: function(sprite){ //重置
     this.startTime = null;
     this.lastAdVance = null;
-    this.lastY = 0;
+    this.lastY = sprite.y;
   }
 }
 
@@ -97,12 +103,7 @@ person.x = 0;
 person.y = 300;
 person.width = 51;
 person.height = 64;
-
-// image.onload = function(){
-  
-//   setInterval(function(){
-//     var now = new Date().getTime();
-//     person.update(context, now);    
-//     person.paint(context);
-//   }, 20);
-// }
+person.jump = function(){
+  jump.start.apply(jump, [person]);       
+}
+person.addPoints();
