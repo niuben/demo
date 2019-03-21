@@ -1,0 +1,258 @@
+<html>
+  <head>
+    <meta >    
+    <title>抽奖（canvas重构）</title>
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+        }
+    </style>
+  </head>
+  <body>
+        <canvas id="lottery" width="400" height="600"></canvas>
+        <script src="./js/base.js"></script>    
+        <script>
+            var canvas = document.getElementById("lottery");
+            var context = canvas.getContext("2d");
+            
+            // 配置
+            const CANVAS_WIDTH = 400;
+            const CANVAS_HEIGHT = 600;
+
+            const LOTTERY_SIZE_WIDTH = CANVAS_WIDTH * 0.8;
+            const LOTTERY_SIZE_HEIGHT = CANVAS_WIDTH * 0.8;
+
+            const LOOP_NUM = 5; // 循环的次数
+            const UNIT_NUM = 8; // 一圈有多少单位;
+            const DURATION = 5000; //            
+            
+
+            const IMAGE_CONF = {
+                bg: {
+                    src: "./lottery/static/bgup@2x-min.png",
+                    x: 0,
+                    y: 10,
+                    w: 720, // 图片实际宽度
+                    h: 774, // 图片实际高度
+                    width: CANVAS_WIDTH, //图片显示宽短
+                },
+                light: {
+                    src: "./lottery/static/shadow1@2x-min.png",
+                    w: 592, // 图片实际宽度
+                    h: 592 // 图片实际宽度                    
+                },
+                light_active: {
+                    src: "./lottery/static/shadow2@2x-min.png",
+                    w: 592,
+                    h: 592
+                },
+                lottery_bg: {
+                    src: "./lottery/static/grid@2x-min.png",
+                    w: 164,
+                    h: 164
+                },
+                lottery_bg_active:{
+                    src: "./lottery/static/grid-active@2x-min.png",
+                    w: 164,
+                    h: 164,
+                    
+                },                
+                lotterys: [{
+                    index: 0,                
+                    src: "./lottery/static/wz@2x-min.png",
+                    w: 164,
+                    h: 164,
+                    text: "旺仔"
+                },{
+                    index: 1,
+                    src: "./lottery/static/jb@2x-min.png",                                       
+                    w: 164,
+                    h: 164,
+                    text: "旺仔"
+                },{
+                    index: 2,
+                    src: "./lottery/static/hb@2x-min.png",                                       
+                    w: 164,
+                    h: 164,
+                    text: "旺仔"
+                },{          
+                    index: 7,          
+                    src: "./lottery/static/wz@2x-min.png",                   
+                    w: 164,
+                    h: 164,
+                    text: "旺仔"
+                },{
+                    
+                    src: "./lottery/static/jb@2x-min.png",                                       
+                    w: 164,
+                    h: 164,
+                    text: "旺仔"
+                },{
+                    index: 4,
+                    src: "./lottery/static/hb@2x-min.png",                                       
+                    w: 164,
+                    h: 164,
+                    text: "旺仔"
+                },{          
+                    index: 7,          
+                    src: "./lottery/static/wz@2x-min.png",                   
+                    w: 164,
+                    h: 164,
+                    text: "旺仔"
+                },{
+                    index: 6,
+                    src: "./lottery/static/jb@2x-min.png",                                       
+                    w: 164,
+                    h: 164,
+                    text: "旺仔"
+                },{
+                    index: 5,
+                    src: "./lottery/static/hb@2x-min.png",
+                    w: 164,
+                    h: 164,
+                    text: "旺仔"
+                }]
+            };
+            
+            /*
+                根据屏幕宽度设置图片
+                灯的宽度是整体宽度82%;
+                奖品整体宽度是灯宽度的70%;                    
+            */
+            var bg = IMAGE_CONF.bg;
+            var light = IMAGE_CONF.light;
+            var lightActive = IMAGE_CONF.light_active;
+            var lotterys = IMAGE_CONF.lotterys;
+
+            bg.height = bg.width * bg.h / bg.w;
+
+            light.width = bg.width * 0.82;
+            light.height = light.width * light.h / light.w;
+            
+            light.x = (bg.width - light.width) / 2;
+            light.y = bg.height - light.height + bg.y;
+                        
+            var lottery_total_width =  bg.width * 0.7;
+            var lottery_total_height =  bg.height * 0.6;
+            var LOTTERY_GAP = 5;                                
+            var lottery_width = (lottery_total_width - 2 * LOTTERY_GAP) / 3; 
+            
+            var lottery_start_x = (bg.width - lottery_total_width) / 2;
+            var lottery_start_y = bg.height * 0.31;
+
+            lotterys.map(function(lottery, index){
+                var row = Math.floor(index / 3);
+                var column = index % 3;
+                lottery.x = lottery_start_x + column * (lottery_width + LOTTERY_GAP);
+                lottery.y = lottery_start_y +  row * (lottery_width + LOTTERY_GAP);
+                                        
+                lottery.width = lottery_width;
+                lottery.height = lottery.width * lottery.h / lottery.w;
+            });
+            
+            
+            //全局变量
+            var pos = 0;
+            var end = 8 * UNIT_NUM;
+
+            //逻辑处理
+            function animate(){
+                
+                startAnimate();
+                var startTime = new Date(); 
+                var start = pos;
+                var handle = setInterval(() => {
+                    // 实现ease-out的效果
+                    const curTime = new Date();
+                    const duration = curTime.getTime() - startTime.getTime();
+                    
+                    //时间轴扭曲
+                    var percent = duration / DURATION;
+                    percent = 1 - Math.pow(1 - percent, 2);
+
+                    if (duration >= DURATION) {
+                        clearInterval(handle);
+                        percent = 1;
+                        start = end % UNIT_NUM;
+                        endAnimate();
+                    }
+                    pos = start + Math.floor((end - start) * percent);
+                    draw();
+
+                }, 1000/60);                
+            }            
+
+
+            function startAnimate(){
+                
+            }
+
+            function endAnimate(){
+
+            }            
+            
+            function draw(){
+                
+                // context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);                
+                //画背景图                                
+                drawImage(IMAGE_CONF["bg"]);
+                
+                //画灯
+                drawImage(IMAGE_CONF["light"]);
+
+                //画奖品
+                IMAGE_CONF.lotterys.map((lottery, index)=>{                    
+                                    
+                    var bgObj = Object.assign({}, lottery);
+                    if(pos % UNIT_NUM != lottery.index){
+                        bgObj.src = "./lottery/static/grid@2x-min.png"
+                    }else{
+                        bgObj.src = "./lottery/static/grid-active@2x-min.png"
+                    }
+                    drawImage(bgObj);
+                    
+                    //设置图片位置
+                    var imgObj = Object.assign({}, lottery);
+                    imgObj.w = 100;
+                    imgObj.h = 100;
+                    imgObj.width  = imgObj.w * bgObj.width/bgObj.w;
+                    imgObj.height = imgObj.h * bgObj.height/bgObj.h;
+                                        
+                    imgObj.x = lottery.x + (bgObj.width - imgObj.width) / 2;
+                    imgObj.y = lottery.y + 10;
+
+                    drawImage(imgObj, function(){
+                        context.font ="10px Arial"; 
+                        context.strokeStyle = "#888";
+                        var sizeObj = context.measureText(lottery.text);
+                        drawText(lottery.text,  bgObj.x + (bgObj.width - sizeObj.width)/2 , imgObj.y + imgObj.height + 10);
+                    });                    
+
+                });
+
+                
+            }
+            
+            function drawText(text, x, y){                
+                //画文字                                
+                context.strokeText(text, x, y);
+                context.stroke();
+            }
+
+            function drawImage(obj, callback){
+                var image = new Image();
+                image.onload = function(){                    
+                    context.drawImage(image, obj.x, obj.y, obj.width, obj.height);
+                    callback && callback();
+
+                }
+                image.src = obj.src;
+            }
+            
+
+            animate();
+
+        </script>
+  </body>
+</html>

@@ -12,4 +12,3 @@ function createTree(name, x, y){
     tree.addPoints();
     return tree;
 }
-    
