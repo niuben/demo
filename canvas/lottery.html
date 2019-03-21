@@ -89,25 +89,25 @@
                     h: 164,
                     text: "旺仔"
                 },{
-                    index: 4,
+                    index: 3,
                     src: "./lottery/static/hb@2x-min.png",                                       
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{          
-                    index: 7,          
+                    index: 6,          
                     src: "./lottery/static/wz@2x-min.png",                   
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{
-                    index: 6,
+                    index: 5,
                     src: "./lottery/static/jb@2x-min.png",                                       
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{
-                    index: 5,
+                    index: 4,
                     src: "./lottery/static/hb@2x-min.png",
                     w: 164,
                     h: 164,
@@ -127,12 +127,15 @@
 
             bg.height = bg.width * bg.h / bg.w;
 
-            light.width = bg.width * 0.82;
+            light.width =  bg.width * 0.82;
             light.height = light.width * light.h / light.w;
             
             light.x = (bg.width - light.width) / 2;
             light.y = bg.height - light.height + bg.y;
                         
+
+
+
             var lottery_total_width =  bg.width * 0.7;
             var lottery_total_height =  bg.height * 0.6;
             var LOTTERY_GAP = 5;                                
@@ -180,7 +183,7 @@
                     pos = start + Math.floor((end - start) * percent);
                     draw();
 
-                }, 1000/60);                
+                }, 100);                
             }            
 
 
@@ -199,6 +202,10 @@
                 drawImage(IMAGE_CONF["bg"]);
                 
                 //画灯
+                
+                    
+                IMAGE_CONF["light"].src = pos % 2 == 0 ? "./lottery/static/shadow1@2x-min.png" :  "./lottery/static/shadow2@2x-min.png";
+                
                 drawImage(IMAGE_CONF["light"]);
 
                 //画奖品
