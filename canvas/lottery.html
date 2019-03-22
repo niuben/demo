@@ -1,16 +1,29 @@
 <html>
   <head>
-    <meta >    
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
     <title>抽奖（canvas重构）</title>
     <style>
         * {
             padding: 0px;
             margin: 0px;
         }
+        img {
+            visibility: hidden;
+        }
     </style>
   </head>
   <body>
         <canvas id="lottery" width="400" height="600"></canvas>
+        <img src="./lottery/static/bgup@2x-min.png" alt="" />
+        <img src="./lottery/static/shadow1@2x-min.png" alt="" />
+        <img src="./lottery/static/shadow2@2x-min.png" alt="" />
+        <img src="./lottery/static/grid@2x-min.png" alt="" />
+        <img src="./lottery/static/grid-active@2x-min.png" alt="" />
+        <img src="./lottery/static/wz@2x-min.png" alt="" />
+        <img src="./lottery/static/jb@2x-min.png" alt="" />
+        <img src="./lottery/static/hb@2x-min.png" alt="" />
+
+
         <script src="./js/base.js"></script>    
         <script>
             var canvas = document.getElementById("lottery");
@@ -30,6 +43,7 @@
 
             const IMAGE_CONF = {
                 bg: {
+                    id: "bgup",                
                     src: "./lottery/static/bgup@2x-min.png",
                     x: 0,
                     y: 10,
@@ -38,76 +52,88 @@
                     width: CANVAS_WIDTH, //图片显示宽短
                 },
                 light: {
+                    id: "shadow1",                
                     src: "./lottery/static/shadow1@2x-min.png",
                     w: 592, // 图片实际宽度
                     h: 592 // 图片实际宽度                    
                 },
                 light_active: {
+                    id: "shadow2",                
                     src: "./lottery/static/shadow2@2x-min.png",
                     w: 592,
                     h: 592
                 },
                 lottery_bg: {
+                    id: "grid",                
                     src: "./lottery/static/grid@2x-min.png",
                     w: 164,
                     h: 164
                 },
                 lottery_bg_active:{
+                    id: "grid-active",                
                     src: "./lottery/static/grid-active@2x-min.png",
                     w: 164,
                     h: 164,
                     
                 },                
                 lotterys: [{
-                    index: 0,                
+                    index: 0,
+                    id: "wz",                
                     src: "./lottery/static/wz@2x-min.png",
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{
                     index: 1,
+                    id: "jb",
                     src: "./lottery/static/jb@2x-min.png",                                       
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{
                     index: 2,
+                    id: "hb",
                     src: "./lottery/static/hb@2x-min.png",                                       
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{          
-                    index: 7,          
+                    index: 7,
+                    id: "wz",    
                     src: "./lottery/static/wz@2x-min.png",                   
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{
-                    
+                    id: "jb",
                     src: "./lottery/static/jb@2x-min.png",                                       
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{
                     index: 3,
+                    id: "hb",
                     src: "./lottery/static/hb@2x-min.png",                                       
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{          
-                    index: 6,          
+                    index: 6,
+                    id: "wz",        
                     src: "./lottery/static/wz@2x-min.png",                   
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{
                     index: 5,
+                    id: "jb",
                     src: "./lottery/static/jb@2x-min.png",                                       
                     w: 164,
                     h: 164,
                     text: "旺仔"
                 },{
                     index: 4,
+                    id: "hb",
                     src: "./lottery/static/hb@2x-min.png",
                     w: 164,
                     h: 164,
@@ -133,8 +159,6 @@
             light.x = (bg.width - light.width) / 2;
             light.y = bg.height - light.height + bg.y;
                         
-
-
 
             var lottery_total_width =  bg.width * 0.7;
             var lottery_total_height =  bg.height * 0.6;
@@ -183,7 +207,7 @@
                     pos = start + Math.floor((end - start) * percent);
                     draw();
 
-                }, 100);                
+                }, 50);                
             }            
 
 
@@ -198,12 +222,11 @@
             function draw(){
                 
                 // context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);                
+                
                 //画背景图                                
                 drawImage(IMAGE_CONF["bg"]);
                 
-                //画灯
-                
-                    
+                //画灯                             
                 IMAGE_CONF["light"].src = pos % 2 == 0 ? "./lottery/static/shadow1@2x-min.png" :  "./lottery/static/shadow2@2x-min.png";
                 
                 drawImage(IMAGE_CONF["light"]);
@@ -213,8 +236,10 @@
                                     
                     var bgObj = Object.assign({}, lottery);
                     if(pos % UNIT_NUM != lottery.index){
+                        bgObj.id = "grid";
                         bgObj.src = "./lottery/static/grid@2x-min.png"
                     }else{
+                        bgObj.id = "grid-active";
                         bgObj.src = "./lottery/static/grid-active@2x-min.png"
                     }
                     drawImage(bgObj);
@@ -229,12 +254,11 @@
                     imgObj.x = lottery.x + (bgObj.width - imgObj.width) / 2;
                     imgObj.y = lottery.y + 10;
 
-                    drawImage(imgObj, function(){
-                        context.font ="10px Arial"; 
-                        context.strokeStyle = "#888";
-                        var sizeObj = context.measureText(lottery.text);
-                        drawText(lottery.text,  bgObj.x + (bgObj.width - sizeObj.width)/2 , imgObj.y + imgObj.height + 10);
-                    });                    
+                    drawImage(imgObj);                    
+                    context.font ="10px Arial"; 
+                    context.strokeStyle = "#888";
+                    var sizeObj = context.measureText(lottery.text);
+                    drawText(lottery.text,  bgObj.x + (bgObj.width - sizeObj.width)/2 , imgObj.y + imgObj.height + 10);
 
                 });
 
@@ -248,16 +272,29 @@
             }
 
             function drawImage(obj, callback){
-                var image = new Image();
-                image.onload = function(){                    
-                    context.drawImage(image, obj.x, obj.y, obj.width, obj.height);
-                    callback && callback();
-
+                
+                var imgEles = document.getElementsByTagName("img");
+                var imgEle;
+                            
+                for(var i in imgEles){
+                    if(typeof imgEles[i] == "object" && imgEles[i].src.indexOf(obj.id) != -1){
+                        imgEle = imgEles[i];
+                        break;
+                    }
                 }
-                image.src = obj.src;
+                
+                context.drawImage(imgEle, obj.x, obj.y, obj.width, obj.height);
+                // var image = new Image();
+                // image.onload = function(){                    
+                //     context.drawImage(image, obj.x, obj.y, obj.width, obj.height);
+                //     callback && callback();
+
+                // }
+                // image.src = obj.src;
             }
             
 
+            
             animate();
 
         </script>

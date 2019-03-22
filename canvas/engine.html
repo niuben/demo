@@ -1,12 +1,11 @@
 <html>
   <head>
-    <style>      
-    </style>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
     <title>引擎</title>
   </head>
 
   <body>
-    <canvas width="800" height="800" id="dog"></canvas>
+    <canvas width="400" height="400" id="dog"></canvas>
     <audio id='whoosh' preload='auto'>        
         <source src='http://s.aigei.com/pvaud/aud/mp3/ff/ff4d3161ba2c42b08891cabc5e9a1c64.mp3?e=1553008680&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:H84Hk6QjW49yTmI3vYoa153KCCg='/>
     </audio>
@@ -24,9 +23,9 @@
     <script src="./sprite/person.js"></script>
     <script src="./sprite/tree.js"></script>
     <script>            
-        //精灵列表，总的像素
+        //精灵列表，总的像素`
         var sprites = [];
-        var PAGE_WIDTH = 800;
+        var PAGE_WIDTH = 400;
         var ADD_SPEED_PAGE_WIDTH = PAGE_WIDTH * 1;
         var speed = 1;
         var total = 0;        
@@ -53,7 +52,7 @@
         game.paintUnderSprites = function(){
             var context = game.context;
             // setInterval(function(){            
-                // context.clearRect(0, 0, 800, 800);
+                // context.clearRect(0, 0, 400, 400);
                 // var now = new Date().getTime();            
             
                 // person.update(context, now);                
@@ -107,8 +106,7 @@
                 // game.setHighScore(1000);
             }
         });
-        game.start();
-                            
+        game.start();                            
     </script>    
   </body>
 </html>
