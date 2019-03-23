@@ -1,0 +1,115 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <style>
+        .edit {
+            padding: 10px;
+            height: 500px;
+            border: 1px solid #000;
+        }
+    </style>
+    <title>视频</title>
+</head>
+
+<body>
+    <button id="play">播放</button> <span>开始时间:</span><select name="" id="startTime">
+        <option value="0">0</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+    </select>
+    <span>结束时间:</span><select name="" id="endTime">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="10" selected>15</option>
+    </select>
+    <video id="demo" autoplay style="width: 1px;height: 1px" x5-playsinline="" playsinline="" webkit-playsinline=""></video>
+    <canvas width="800" height="800" id="dog" style="background:black"></canvas>
+    <img id="preview" src="" />
+    <script src="./static/gif.js"></script>
+    <script>
+        
+
+        window.onload = function () {
+            
+            var video = document.getElementById("demo");
+            var canvas = document.getElementsByTagName("canvas")[0];
+            var context = canvas.getContext("2d");
+            var play = document.getElementById("play");
+            var preview = document.getElementById("preview");
+            var handle, 
+                total = 0; 
+
+            var gif = new GIF({
+                workers: 2,
+                quality: 10,
+                height: 400,
+                width: 400,
+                workerScript: "./static/gif.worker.js"
+            });
+            gif.on("finished", function (blob) {
+                var imgEle = createImg(blob);
+                document.body.appendChild(imgEle);
+            });
+
+            video.addEventListener("play", function () {
+                console.log("play");                
+                
+                handle = setInterval(function () {
+                    total++;
+                    context.clearRect(0, 0, 800, 800);
+                    context.drawImage(video, 0, 0, 400, 800);
+                    drawText("哈哈哈哈~");
+                    // preview.src = canvas.toDataURL("image/gif", 1.0);
+                    canvas.toBlob(function(blob){
+                        var imgEle = createImg(blob);                        
+                        gif.addFrame(imgEle);                        
+                    })
+                    if (Math.floor(video.currentTime) == endTime.value) {
+                        console.log(total);
+                        video.pause();
+                        clearInterval(handle);                        
+                        gif.render();
+                    }
+
+                }, 200);
+            });
+            
+            play.onclick = function (params) {                
+                video.currentTime = parseInt(startTime.value);
+                video.play();
+            }
+            video.src = "./static/1550013977330225.mp4";
+
+            function createImg(blob){
+                var imgEle = document.createElement("img");
+                blobToDataURI(blob, function (base64) {
+                    imgEle.src = base64;
+                })
+                return imgEle
+                // 
+                
+            }
+            function blobToDataURI(blob, callback) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    callback(e.target.result);
+                }
+                reader.onerror = function (e) {
+                    console.log("reader error", e);
+                }
+                reader.readAsDataURL(blob);
+            }
+
+            function drawText(text) {
+                context.font = "bold 35px Arial";
+                context.textAlign = "center";
+
+                context.fillText(text, 100, 100);
+                context.fillText(text, 100, 100);
+            }            
+        }
+    </script>
+</body>
+
+</html>

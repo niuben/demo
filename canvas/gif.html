@@ -1,0 +1,61 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <style>
+        .edit {
+            padding: 10px;
+            height: 500px;
+            border: 1px solid #000;
+        }
+    </style>
+    <title>视频</title>
+</head>
+
+<body>    
+    <img src="./shared/images/sky.png" style="width: 1px; height: 1px"/>
+    <img src="./shared/images/smalltree.png" style="width: 1px; height: 1px" />
+
+    <img src="./" alt="">    
+    <script src="./static/gif.js"></script>
+    <script>
+        function blobToDataURI(blob, callback){
+            var reader = new FileReader();
+            reader.onload = function(e){
+                callback(e.target.result);
+            }
+            reader.readAsDataURL(blob);
+        }
+
+        window.onload = function(){
+            var img = document.getElementsByTagName("img")[0];
+            var img1 = document.getElementsByTagName("img")[1];
+            var gif = new GIF({
+                workers: 2,
+                quality: 10,
+                height: 400,
+                width: 400,
+                workerScript: "./static/gif.worker.js"
+            });
+            gif.addFrame(img);
+            gif.addFrame(img1);
+            gif.on("finished", function(blob){
+                                                
+                var imgEle = document.createElement("img");            
+                blobToDataURI(blob, function(base64) {
+                    imgEle.src = base64;    
+                })                
+                document.body.appendChild(imgEle);
+                
+                // var evt = document.createEvent("MouseEvents");
+                // evt.initEvent("click", false, false);
+                // el.dispatchEvent(evt);
+                // document.body.removeChild(el);            
+                
+            });
+            gif.render();
+        }
+    </script>
+</body>
+
+</html>

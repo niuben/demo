@@ -131,25 +131,27 @@
 
             context.beginPath();
             context.save();
-            context.strokeStyle = "#000";
-            context.arc(startX, startY, radius, 0, 2 * Math.PI);
-            // context.stroke();
-            context.clip();
-            context.drawImage(
-                img,
-                173 * scale,
-                176 * scale,
-                30 * scale * multiple,
-                24 * scale * multiple,
-                startX - (30 * multiple / 2),
-                startY - (24 * multiple / 2),
-                30 * multiple,
-                24 * multiple
-            );
-            context.restore();
-        }
-    };
+            context.strokeStyle = "#00FF00";
+            // var pattern = context.createPattern(img, "no-repeat");0            
+            // context.fillStyle = pattern;
+            // context.restore();
+            context.rect(0, 0, 150, 150);
 
+
+            context.clip();
+            // context.translate(100, 100);
+            context.drawImage(img, 850, 850, 140, 140, 0, 0, 3024, 4032);
+            context.restore();
+            // context.fill();
+
+            context.save();
+            context.strokeStyle = "#FF0000";
+            context.rect(75, 75, 75, 75);
+            context.clip();
+            context.drawImage(img, 1850, 1850, 140, 140, 0, 0, 3024, 4032);
+            context.restore();
+            
+        }    
 
     document.onclick = function(e) {
         var pos = windowToCanvas(e);
