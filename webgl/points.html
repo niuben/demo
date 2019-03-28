@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>points</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">    
+</head>
+<body>
+    <div id="error"></div>
+    <canvas id="canvas" width="400px" height="400px"></canvas>
+    <script src="https://niuben.github.io/demo/webgl/lib/webgl-utils.js"></script>
+    <script src="https://niuben.github.io/demo/webgl/lib/webgl-debug.js"></script>
+    <script src="https://niuben.github.io/demo/webgl/lib/cuon-utils.js"></script>
+    <script src="https://niuben.github.io/demo/webgl/lib/cuon-matrix.js"></script>
+    <script>
+        function windowToCanvas(e) {
+            var x = e.x || e.clientX,
+                y = e.y || e.clientY,
+                bbox = canvas.getBoundingClientRect();
+
+            console.log(bbox);
+
+            return {
+                x: x - bbox.left * (canvas.width / bbox.width),
+                y: y - bbox.top * (canvas.height / bbox.height),
+                width: bbox.width,
+                height: bbox.height
+            };
+        };
+    </script>
+    <script src="./for.js"></script>
+</body>
+</html>

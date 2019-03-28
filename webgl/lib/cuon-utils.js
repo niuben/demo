@@ -79,7 +79,7 @@ function loadShader(gl, type, source) {
   gl.shaderSource(shader, source);
 
   // Compile the shader
-  gl.compileShader(shader);
+  console.log(gl.compileShader(shader));
 
   // Check the result of compilation
   var compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);

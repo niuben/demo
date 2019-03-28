@@ -1,0 +1,97 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+        <style>
+            .edit {
+                padding: 10px;
+                height: 500px;
+                border: 1px solid #000;
+            }
+        </style>
+        <title>视频</title>
+    </head>
+<body>
+    <button id="play">播放</button> <span>开始时间:</span><select name="" id="startTime">
+        <option value="0">0</option>        
+        <option value="5">5</option>
+        <option value="10">10</option>
+    </select>
+    <span>结束时间:</span><select name="" id="endTime">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="10" selected>15</option>
+    </select>
+
+    <video id="demo" autoplay style="width: 1px;height: 1px" x5-playsinline="" playsinline="" webkit-playsinline=""></video>
+    <canvas width="800" height="800" id="dog" style="background:black"></canvas>
+    <script src="./static/gif.js"></script>
+    <script>
+        // window.onload = function() {
+            var video = document.getElementById("demo");
+            var canvas = document.getElementById("dog");
+            var context = canvas.getContext("2d");
+            var play = document.getElementById("play");
+
+            var gif = new GIF({
+                workers: 2,
+                quality: 10,
+                width: 400,
+                height: 400
+            });
+            
+            var handle;
+
+            var startTime = document.getElementById("startTime");
+            var endTime = document.getElementById("endTime");
+
+            video.addEventListener("play", function() {
+                console.log("play");
+                gif.addFrame(context,{
+                    copy: true,
+                    delay: 100
+                });                    
+                handle = setInterval(function(){
+                    context.clearRect(0, 0, 800, 800);
+                    context.drawImage(video, 0, 0, 400, 800);
+                    drawText("哈哈哈哈~");                    
+                    if(Math.floor(video.currentTime) == endTime.value){
+                        video.pause();
+                        clearInterval(handle);
+                    }
+                    
+                }, 20);
+            });
+            
+            gif.on("finished", function(blob) {
+                console.log(blob);
+            })
+            gif.render();
+
+            video.onended = function(params) {
+                // alert("e`   1nd");
+            }
+                    
+            // video.onloadeddata = function() {
+            //     video.play();                            
+            // }
+            play.onclick = function (params) {
+                alert(startTime.value);
+                video.currentTime = parseInt(startTime.value);
+                video.play();        
+            }
+            video.src = "./static/video.mp4";
+
+            //写文字
+            function drawText(text){
+                context.font = "bold 35px Arial";
+                context.textAlign = "center";
+
+                context.fillText(text, 100, 100);
+                context.fillText(text, 100, 100);
+            }
+            // video.setAttribute("autoPlay", "autoPlay");           
+            
+    </script>
+</body>
+
+</html>
