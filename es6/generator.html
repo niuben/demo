@@ -42,8 +42,36 @@
         // 开始处理过程
         step();
       }
+      // run(fetchData)
+      
+      //使用生成器解决异步编程问题
+      var readFile1 = function(){
+          setTimeout(function(){      
+              iterator1.next(123);
+          }, 2000);
+      }
 
-      run(fetchData)
+      var createIterator1 = function*(){    
+          var content = yield readFile1();
+          console.log(content);
+      }
+
+      var iterator1 = createIterator1();
+      console.log(iterator1.next());
+      
+      //生成器传值
+      var  createIterator2 = function*(){
+        var first = yield 1;
+        var second = yield first + 2;
+        var third = yield second + 3;
+      }
+
+      var iterator2 = createIterator2();
+      console.log(iterator2.next());
+      console.log(iterator2.next(2)); //4
+      console.log(iterator2.next(3)); //6
+
+
     </script>
   </body>
 </html>
