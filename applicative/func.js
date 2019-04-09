@@ -417,4 +417,159 @@ log(_.reduce([1, null, 1], function(total, num) {
     多态函数：同一操作，使用不同对象，显示出不同结果;
 */ 
 
+function stringReverse(s){
+    if(!_.isString(s)) return undefined;
+    return s.split('').reverse().join("");
+}
+console.log(stringReverse("123"));
 
+
+//组合多个行动;
+function dispatch(){        
+    var funs = _.toArray(arguments);
+    var size = funs.length;
+
+    return function(target, /*, args*/){
+        var ret = undefined;
+        var args = _.rest(arguments);
+
+        for (var i = 0; i < size; i++) {
+            var fun = funs[i];
+            ret = fun.apply(fun, construct(target, args));
+
+            if(existy(ret)) return ret;
+        }
+        return ret;
+    }
+}
+
+log("construct", construct(1, [2, 3, 4]));
+// var rev = dispatch("reverse", Array.prototype.reverse);
+var rev = dispatch(stringReverse, );
+log("rev", rev("1234"));
+
+//dispatch消除if和else
+function isa(type, fun){
+    return function(obj){
+        if(type == obj.type){
+            return fun.call(fun, obj);
+        }
+    }
+}
+
+var performCommand = dispatch(isa("aaa", function(){
+    return "aaa";
+}), isa("bbb", function(){
+    return "bbb";
+}));
+
+log("performCommand", performCommand({"type": "aaa"}));
+
+
+/*
+* 柯里化(currying)
+* -------------------------
+* function(a, b, c){ return a; }  
+* 
+    function(a, b, c){ 
+        return c;
+    }
+    function c(a, b){
+        return b;
+    }
+    function b(){
+        return a;
+    }
+* -------------------------     
+*/
+function rightCurrying(){
+    var args = _.toArray(arguments);
+    var method = args.shift();
+    // var target = args.shift();
+
+    return method.apply(null, args); 
+} //只能适用于数组???
+// log(rightCurrying(Array.prototype.reverse, [1, 2, 3]));
+log(rightCurrying(cat, [1, 2, 3], [4], [5]));
+
+/**
+ * 接收一个方法，在任何给定的对象上调用它 ⭐️
+ * 意义在于：
+ *     把方法变成了函数，比如下面的 map，本来是 arr.map 现在变成了一个函数
+ *     并且做好了兼容，对象调用本身没有的方法时，就返回 undefined
+*/
+function doWhen(condition, fun){
+    if(condition == true){
+        return fun();
+    }
+}
+
+function invoker(name, method){
+    return function(target){
+        if(!existy(target)){
+            console.warn('must provide a target');
+            return ;
+        }
+        var targetMethod = target[name]; // 得到方法
+        var args = _.rest(arguments); // 调用对象就要放到参数中，而原来的参数就是 _.rest(arguments)
+
+        return doWhen(existy(targetMethod) && method===targetMethod, function(){
+            return targetMethod.apply(target, args);
+        });
+    };
+}
+
+var rev = invoker("reverse", Array.prototype.reverse);
+
+console.log("rev", rev([1, 2, 3]));
+
+//左右柯里化函数
+function rightCurry(n){
+    return function(d){
+        return n/d;
+    }
+}
+
+function leftCurry(n){
+    return function(d){
+        return d/n;
+    }
+}
+
+function curry(fn){
+    return function(target){
+        return fn(target);
+    }
+}
+
+log("right", rightCurry(10)(2), "left", leftCurry(10)(2));
+log("parseInt", _.map(["11", "11", "11"], parseInt));
+log("curry", _.map(["11", "11", "11"], curry(parseInt)));
+
+//双函数柯里化
+function curry2(fn){
+    return function(rightArg){
+        return function(leftArg){
+            return fn(leftArg, rightArg);
+        }
+    }
+}
+log(curry2(function(n, d){
+    return n/d
+})(10)(2));
+
+var parseInt2 = curry2(parseInt)(2);
+log("parseInt2", parseInt2("111"));
+
+
+//"_.countBy: 可以计算1"
+log("_.countBy", _.countBy([1, 2, 3], function(num){
+    return 1;
+}));
+
+var count = curry2(_.countBy)(function(num){
+    return "123-123";
+});
+
+
+log("curry2", count([1, 2, 3]));
