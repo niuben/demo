@@ -1,6 +1,8 @@
 /*
 * 函数式编程的好处：
 * 1. 可以最大化发挥函数的优势;
+* 2. 尾递归
+
 */
 var _ = require("underscore");
 function log(){
@@ -523,6 +525,13 @@ var rev = invoker("reverse", Array.prototype.reverse);
 
 console.log("rev", rev([1, 2, 3]));
 
+function partial1(fun, arg1){
+    return function(){
+        var arg = construct(_.toArray(arguments), arg1);
+        return fun.apply(fun, arg);
+    }
+}
+
 //左右柯里化函数
 function rightCurry(n){
     return function(d){
@@ -573,3 +582,198 @@ var count = curry2(_.countBy)(function(num){
 
 
 log("curry2", count([1, 2, 3]));
+
+function curry3(fn){
+    return function(thirdArg){
+        return function(secondArg){
+            return function(firstArg){
+                return fn(firstArg, secondArg, thirdArg);
+            }
+        }
+    }
+}
+
+log(curry3, curry3(_.map)()(function(num){
+    return num + 1;
+})([12, 1, 2]));
+
+
+//函数组合
+log("_compose", _.compose(function(x){
+    return !x
+}, _.isBoolean, _.isNumber, _.isDate)(1));
+
+
+
+//递归的核心是：一个子问题是由一个更大问题分解出来的;
+function myLength(arg){
+    if(_.isEmpty(arg)){
+        return 0
+    }else{
+        return 1 + myLength(_.rest(arg));
+    }
+}
+log("myLength", myLength([1, 2, 3]));
+
+
+//使用递归的方式复制函数
+function cycle(times, arr){
+    if(times <= 1){
+        return arr;
+    }else{
+        return cat(arr, cycle(times - 1, arr));
+    }
+}
+log("cycle", cycle(4, [1, 2, 3]));
+
+/*
+递归的三个步骤
+1. 结束条件
+2. 计算
+3. 下一步动作或者分解成更小的问题
+*/
+var graphArr = [
+    ['Lisp', "Smalltalk"],
+    ['Lisp', "Scheme"],
+    ['Smalltalk', 'Self'],
+    ['Scheme', 'Javascript'],
+    ['Scheme', 'Lua'],
+    ['Self', 'Lua'],
+    ['Self', 'Javascript']
+];
+
+/*
+* 能不能优化了？？？
+* 循环结构; 并且没有结束条件
+* _.map函数用在递归方面的
+*/
+function next(graph, node){
+    var link = [];
+    _.map(graph, function(selfNode){  //结束条件
+        if(_.isArray(selfNode)){
+            link = cat(next(selfNode, node), link);  //下一步
+            return;
+        }
+
+        if(selfNode == node){
+            link = cat(_.without(graph, node), link); 
+        }
+    });
+    return link; //结束条件
+}
+
+/*
+* 线性结构
+*/ 
+function next(graph, node){
+    if(_.isEmpty(graph)) return [];   //结束条件
+    
+    var arr = [];
+    var first = _.first(graph);
+    var rest = _.rest(graph);
+
+    if(_.contains(first, node)){
+        return cat(_.without(first, node), next(rest, node));   //一个步骤
+    }else{
+        return cat(next(rest, node), arr);  //下一步
+    }        
+}
+
+log("recursion", next(graphArr, "Self"));
+
+//深度优先自递归
+function depthSearch(graph, nodes, seen){   //尾递归: 最后一个动作是递归;
+    if(_.isEmpty(nodes)) return rev(seen); //结束条件
+
+    var node = _.first(nodes);
+    var more = _.rest(nodes);
+
+    if(_.contains(seen, node)){
+        return depthSearch(graph, more, seen);  //一步操作
+    }else{
+        return depthSearch(graph,       //缩小内容
+                           cat(next(graph, node), more), //
+                           construct(node, seen));
+    }
+}
+log("depthSearch", depthSearch(graphArr, ["Lisp"], []));
+
+
+/*
+* 关联函数
+*/
+function evenSteven(n){
+    if(n == 0)
+        return true;
+    else    
+        return oddJohn(Math.abs(n) - 1);
+}   
+
+function oddJohn(n){
+    if(n == 0)
+        return true;
+    else    
+        return evenSteven(Math.abs(n) - 1);
+}   
+
+log("oddJohn", oddJohn(1));
+
+//将多维数组变成一维数组;
+function flat(array){
+
+    if(_.isArray(array)){
+        return cat.apply(cat, _.map(array, flat)); //缩小内容 //一步动作;
+    }else{
+        return [array];   //结束条件
+    }    
+}
+log("flat", flat([1,2,3, [4, [5]]]));
+
+/*
+* 修改
+*/ 
+function evenSteven1(n){
+    if(n == 0)
+        return true;
+    else    
+        return partial1(oddJohn1, Math.abs(n) - 1);
+}   
+
+function oddJohn1(n){
+    if(n == 0)
+        return true;
+    else    
+        return partial1(evenSteven1, Math.abs(n) - 1);
+}
+
+//蹦床
+function trampoline(fn, /**/){
+    var arg = _.rest(arguments);
+    var result = fn.apply(fn, arg);
+
+    while(_.isFunction(result)){
+        result = result();
+    }
+
+    return result;
+}
+
+
+log("evenSteven1", trampoline(evenSteven1, 10000000))
+
+//太多递归了
+try{
+    log("evenSteven", evenSteven(1000000)());
+}catch(e){
+    console.log(e);
+}
+
+//水平调用
+log("partial1", evenSteven(1));
+
+
+/*
+* 函数的不可变性 
+*/
+var s = "abc";
+log(s.toUpperCase(), s);
