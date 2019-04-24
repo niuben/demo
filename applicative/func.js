@@ -22,7 +22,9 @@ function splat(fun){
 }
 
 //  一个返回函数的函数
-var add = splat(function(x, y){return x + y});  //？怎么用_进行相加
+var add = splat(function(x, y){
+    return x + y
+});  //？怎么用_进行相加
 console.log(add([1, 2, 3, 4]));
 
 function unsplat(fun){
@@ -757,9 +759,7 @@ function trampoline(fn, /**/){
 
     return result;
 }
-
-
-log("evenSteven1", trampoline(evenSteven1, 10000000))
+log("evenSteven1", trampoline(evenSteven1, 10000000));
 
 //太多递归了
 try{
@@ -769,7 +769,7 @@ try{
 }
 
 //水平调用
-log("partial1", evenSteven(1));
+log("partial1", evenSteven(1));;
 
 
 /*
@@ -777,3 +777,40 @@ log("partial1", evenSteven(1));
 */
 var s = "abc";
 log(s.toUpperCase(), s);
+
+
+/* 
+* 惰性链: 只有调用value方法才触发;
+* lazyChain(fun1, fun2, fun3, value())
+* 如果有value的话则执行之前的函数;
+* 1. 遍历argument数组，判断是否有value, 如果有的话则将所有函数都运行一遍，上一个函数输出是下一个函数的输入;
+* 
+*/
+// function lazyChain(obj, /* arguments */){
+//     var funs = _.toArray(arguments);
+//     var val = _.clone(obj);
+//     if(funs.name == "value"){
+//         _.map(funs, function(fun){
+//                 val = fun.apply(val);
+//         });
+//     }
+//     return val;
+// }
+// lazyChain();
+
+
+
+
+/* 
+* mixin方式：先将多个方法混合一起，然后通过_.extend实现继承方式；因为mixin是一个函数组合的方式，从而比结构化继承的方式要更加的灵活;
+* mixin的优点：具有函数组合的优点；
+* mixin的缺点：为了避免覆盖错误需要知道各个函数功能；当有多个mixin时需要主要各个先后顺序：
+*/
+
+
+/* 
+方法：需要关注
+
+*/
+
+
