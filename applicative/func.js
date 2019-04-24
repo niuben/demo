@@ -111,6 +111,8 @@ function cat(){
 }
 console.log(cat([1, 2, 3], [4, 5]));
 
+
+
 //将数组和数字联系在一起
 function construct(head, tail){
     return cat([head], _.toArray(tail));
@@ -394,10 +396,18 @@ function repeatly(loopFun, fun, firstValue){
         1. 闭包可以返回相同的参量
         2. 一个新的闭包会
 */
+function always(VALUE){
+    return function(){
+        return VALUE;
+    }
+}
+
 
 /*
 4.2.0 组合子(combinator)、多态函数
 */
+
+
 
 /*
 4.2.1 高阶函数捕获变量
@@ -411,16 +421,105 @@ log(add100(38));
 
 /*
 * 4.2.2 防止不存在的函数：fnull, 
+* fnull好处是可以懒惰式调用，只有在运行时才调用;
 */ 
-log(_.reduce([1, null, 1], function(total, num) {
+var numArr = [1, 2, 3, 4, null];
+log("null:", _.reduce(numArr, function(total, num) {
     return total * num;
+}), _.reduce(_.pluck([{num: 1}, {num: null}], "num"), function(total, num){
+    return total * num;
+}), _.reduce(numArr, function(total, num) {
+    return existy(num) ? total * num : total;
 }));
+
+//safeMute
+function fnull(fun, /*, defaults */){
+    var defaults = _.rest(arguments);
+    return function() {
+        var args = _.map(arguments, function(num, i){
+            log("num", num, existy(num) ? num : defaults[i]);
+            return existy(num) ? num : defaults[i];
+        });        
+        return fun.apply(null, args);
+    }
+}
+
+var safeMute = fnull(function(total, n){
+    return total * n;
+}, 1, 1);
+
+
+log("safeMute1", _.reduce(numArr, safeMute));
+log("defaults", _.reduce(numArr, _.identity));
+//解决配置项问题
+
+/*
+*  underscore _.chain方法
+*/
+log("_.chain", _.chain(numArr).map(function(num){
+    return num * 10;
+}).reverse().first().value());
+
+/*
+*  检查表单
+*/
+function checker(){
+    var validators = _.toArray(arguments);
+    return function(obj){
+        return _.reduce(validators, function(errs, check){
+            if(check(obj)){
+                return errs
+            }else{
+                return _.chain(errs).push(check.message).value()
+            }
+        }, []);
+    }
+}
+log("checker true", checker(always(true), always(true))({}));
+
+var fails = always(false);
+fails.message = "this is error";
+
+log("checker false", checker(fails)({}));
+function validator(message, fun){      
+    var f = function(){
+        return fun.apply(fun, arguments);
+    }
+    f["message"] = message;
+    return f;
+}
+log("validator", checker(validator("validator fail", always(false)))({}))
+
+//还没有第二种写法??
+function validator2(message, fun){
+    fun["message"] = message;
+    return fun
+}
+log("validator2", checker(validator2("validator2 fail", always(false)))({}))
+
+//使用其他的函数
+var isObj = function(obj){
+    return _.isObject(obj);
+}
+var checkObject = checker(validator2("this is not object!", isObj));
+log("validator2", checkObject({}));
+
+//_.every和_.map区别
+log(_.every([1, 2, 3], function(num){
+    return num > 0;
+}))
+
+
+
 
 /*
 * 5. 由函数构造函数
     多态函数：同一操作，使用不同对象，显示出不同结果;
+*/
+/*
+*
+* 
 */ 
-
 function stringReverse(s){
     if(!_.isString(s)) return undefined;
     return s.split('').reverse().join("");
@@ -581,7 +680,6 @@ log("_.countBy", _.countBy([1, 2, 3], function(num){
 var count = curry2(_.countBy)(function(num){
     return "123-123";
 });
-
 
 log("curry2", count([1, 2, 3]));
 
