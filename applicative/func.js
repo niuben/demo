@@ -526,7 +526,6 @@ function stringReverse(s){
 }
 console.log(stringReverse("123"));
 
-
 //组合多个行动;
 function dispatch(){        
     var funs = _.toArray(arguments);
