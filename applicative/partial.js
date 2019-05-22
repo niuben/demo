@@ -2,22 +2,6 @@ var _ = require("underscore");
 
 console.log("_", _);
 
-function condition(/**/){
-    var validators = _.toArray(arguments);
-    return function(fun, arg){
-        var errors = _.map(validators, function(isValid){
-            if(isValid(arg)){
-                return [];
-            }else{
-                return false;
-            }
-        })
-
-        if(!_.isEmpty(errors)) throw new Errors(errors.join(""));
-
-        return fun(arg);
-    }
-}
 
 function cat(){
 	var head = _.first(arguments);
@@ -44,7 +28,7 @@ function validator(error, fun){
 }
 
 //条件判断
-function condition1(){
+function condition(){
     var validators = _.flatten(_.toArray(arguments));
     return function(fun, /* argus */){
         var argus = _.rest(arguments);
@@ -55,7 +39,6 @@ function condition1(){
                 errors.push(msg.error);
             }            
         });        
-
         if(_.isEmpty(errors)){  
             return fun.apply(fun, argus);
         }        
@@ -68,6 +51,13 @@ function partial(fun){
     return function(){
         return fun.apply(fun, cat(argus, _.toArray(arguments)));
     }
+}
+
+function pipeline(target, /*funs*/){
+    var funs = _.rest(arguments);
+    return _.reduce(funs, function(curTarget, fun){
+        return fun(curTarget);
+    }, target);
 }
 
 // function div(x, y){
@@ -89,8 +79,8 @@ var checkSqr = [
     })];
 
 
-var checkNum = condition1(
-    checkSqr, 
+var checkNum = condition(
+    checkSqr,     
     validator("it must be lower 10", function(n){
         return n < 10;
     })
@@ -100,8 +90,131 @@ var unCheckSqr = function(n, m) {
     return n * m;
 }
 
-// var sqr = partial(_.compose(checkSqr, checkNum), unCheckSqr); //
+// var sqr = partial(checkNum, unCheckSqr);
+// sqr(2, 3);
 
-// var sqr = partial(partial(checkSqr, checkNum), unCheckSqr); //
-var sqr = partial(checkNum, unCheckSqr);
-console.log(sqr("2", 3));
+//把前置条件和后置条件分开
+// 给函数增加后置条件的判断
+
+// var suffixCheckSqr = condition(
+//     validator("需要大于5", function(n){
+//         return n < 5;
+//     })
+// )
+
+// var suffixSqr = _.compose(suffixCheckSqr, sqr);
+// console.log(suffixSqr(2, 3));
+
+
+//如何用函数式重构登录页面
+function login (callback) {
+    var vote = checkbox.val();
+    var phone = $.trim($phone.val());
+    var code = $.trim($code.val());
+    var $err = null;
+
+    var err = false
+    $phoneErr.html('');
+    $codeErr.html('');
+    
+    if (phone == '手机号') {
+        phone = ''
+    }
+
+    if (code == '验证码') {
+        code = ''
+    }
+
+    if (phone == '') {
+      $phoneErr.hide().html('请填写手机号').fadeIn()
+      err = true
+    } else if (!/^\d{11}$/.test(phone)) {
+      $phoneErr.hide().html('请填写正确的手机号码').fadeIn()
+      err = true
+    } else if (code == '') {
+      $codeErr.hide().html('请填写验证码').fadeIn()
+      err = true
+    }
+
+    if (err) {
+      callback()
+      return
+    }
+    $phoneErr.html('')
+    $codeErr.html('')
+    $.get(URL.login, {
+      phone: phone,
+      code: code,
+      _: new Date().getTime()
+    }, 'json').done(function (data) {
+      var infor = data.data;      
+      if (code >= 0 && typeof infor == "object" && window.location.port == "1337") {
+        for(var key in infor){                  
+          $.cookie(key, infor.key,{
+            path: "/",
+            expires: 30,
+          })
+        }        
+      }
+      if (data.code == 0) {        
+        location.reload()
+      } else {
+        alert(data.msg);
+      }
+      callback()
+    }).fail(function (data) {
+      alert(JSON.stringify(data))
+      callback()
+    })
+  }
+
+
+/*
+* 重构一个表单提交;
+* 1. 表单信息收集
+* 2. 表单信息验证(UI处理)
+* 3. 表单信息发送
+* 4. 结果处理(UI处理)
+*/ 
+
+var getForm = function(){
+    return {
+        iphone: "130000001221",
+        code: "4444"
+    }
+};
+
+var checkForm = condition(
+    validator("请填写手机号", function(phone, code){ 
+        return !_.isEmpty(phone);
+    }), validator("手机号格式不正确", function(phone, code){ 
+        return /^\d{11}$/.test(phone);
+    }), validator("验证码不为空", function(phone, code){
+        return !_.isEmpty(code);
+    })
+);
+
+var unCheckForm = function(phone, code){
+    // $ajax...
+    return {
+        status: 1,
+        error: "mess"
+    }
+};
+
+var afterForm = function(mess){
+    if(mess.status == 1) {
+        console.log("success");
+    }else{
+        console.log("error");
+    }
+}
+
+// var form = _.compose(afterForm, partial(checkForm, unCheckForm), getForm);
+
+console.log(pipeline(_.toArray(getForm()), partial(checkForm, unCheckForm), afterForm));
+
+/*
+增加后置判断    
+*/
+// form();
