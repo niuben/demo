@@ -202,7 +202,7 @@ var unCheckForm = function(phone, code){
     }
 };
 
-var afterForm = function(mess){
+var afterForm = function(mess){    
     if(mess.status == 1) {
         console.log("success");
     }else{
@@ -211,10 +211,9 @@ var afterForm = function(mess){
 }
 
 // var form = _.compose(afterForm, partial(checkForm, unCheckForm), getForm);
-
 console.log(pipeline(_.toArray(getForm()), partial(checkForm, unCheckForm), afterForm));
 
 /*
-增加后置判断    
+关于前置判断总结：可以判断和操作分开，这样的话逻辑清楚且提高代码的复用率； 在数据操作类方向应用场景比较多;
+关于后置判断总结：对操作结果进行判断？ 使用场景有哪些？ 其实要保证数据稳定性;
 */
-// form();

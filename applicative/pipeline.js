@@ -9,7 +9,7 @@ function log(){
     console.log.apply(null, _.toArray(arguments));
 }
 
-//
+//lazy pipelien
 function pipeline(target, /*funs*/){
     var funs = _.rest(arguments);
     return _.reduce(funs, function(curTarget, fun){
@@ -17,9 +17,11 @@ function pipeline(target, /*funs*/){
     }, target);
 }
 
+
 function twice(target){
     return pipeline(target, _.rest, _.rest);
 }
+
 
 log(pipeline([1, 2, 3, 4, 5], twice, twice));
 
